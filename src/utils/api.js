@@ -1,6 +1,6 @@
 import { refreshCsrfToken } from "./csrftoken"; // ✅ Import CSRF token function
 
-const API_BASE_URL = "https://shop-sphere-app.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // ✅ Refresh Access Token
 export const refreshAccessToken = async () => {
