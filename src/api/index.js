@@ -1,11 +1,38 @@
 import secureFetch from "../utils/api";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // ✅ Helper to Get JWT Token
 const getAuthHeaders = () => {
   const token = localStorage.getItem("access_token");
   return { Authorization: `JWT ${token}` };
+};
+
+// ✅ Send OTP
+export const sendOTP = async (email) => {
+  const response = await fetch(`${API_BASE_URL}/send_otp/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) throw new Error("Failed to send OTP");
+  return response.json();
+};
+
+// ✅ Verify OTP
+export const verifyOTP = async (email, otp) => {
+  const response = await fetch(`${API_BASE_URL}/verify_otp/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, otp }),
+  });
+
+  const data = await response.json();
+  if (!response.ok || !data.success) throw new Error(data.message || "Failed to verify OTP");
+  return true;
 };
 
 export const updateUserInfo = async (token, userData) => {
