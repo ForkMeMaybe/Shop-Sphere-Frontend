@@ -89,16 +89,16 @@ const Navbar = () => {
         </Link>
 
         {/* ✅ Search Bar */}
-        <div className="hidden md:flex items-center flex-grow mx-8">
-          <input
-            type="text"
-            placeholder="Search for products..."
-            className="w-full p-2 rounded-l-md border-none focus:ring focus:ring-blue-400"
-          />
-          <button className="bg-yellow-500 text-white px-4 py-2 rounded-r-md hover:bg-yellow-600 transition">
-            🔍
-          </button>
-        </div>
+        {/* <div className="hidden md:flex items-center flex-grow mx-8"> */}
+        {/*   <input */}
+        {/*     type="text" */}
+        {/*     placeholder="Search for products..." */}
+        {/*     className="w-full p-2 rounded-l-md border-none focus:ring focus:ring-blue-400" */}
+        {/*   /> */}
+        {/*   <button className="bg-yellow-500 text-white px-4 py-2 rounded-r-md hover:bg-yellow-600 transition"> */}
+        {/*     🔍 */}
+        {/*   </button> */}
+        {/* </div> */}
 
         {/* ✅ Navigation Links */}
         <div className="flex items-center space-x-6 text-gray-100 font-semibold drop-shadow-md">

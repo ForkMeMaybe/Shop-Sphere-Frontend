@@ -1,6 +1,6 @@
 import secureFetch from "../utils/api";
 
-const BASE_URL = "https://shop-sphere-app.onrender.com";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 // ✅ Helper to Get JWT Token
 const getAuthHeaders = () => {
