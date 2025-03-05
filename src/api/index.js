@@ -2,6 +2,83 @@ import secureFetch from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+export const postReview = async (productId, reviewData) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Authentication required to post a review.");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/store/products/${productId}/reviews/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `JWT ${token}`, // ✅ Require authentication
+    },
+    body: JSON.stringify(reviewData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to post review");
+  }
+
+  return await response.json(); // ✅ Return new review data
+};
+
+export const deleteReview = async (productId, reviewId) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Authentication required to delete a review.");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/store/products/${productId}/reviews/${reviewId}/`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `JWT ${token}`,  // ✅ Require authentication
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete review");
+  }
+
+  return true; // ✅ Successfully deleted
+};
+
+export const getReviews = async (productId) => {
+  const response = await fetch(`${API_BASE_URL}/store/products/${productId}/reviews/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch reviews");
+  }
+
+  return response.json();
+};
+
+// ✅ Update a Review
+export const updateReview = async (productId, reviewId, updatedData, csrfToken) => {
+  const response = await fetch(`${API_BASE_URL}/store/products/${productId}/reviews/${reviewId}/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrfToken, // ✅ Required for security
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(updatedData),
+  });
+
+  if (!response.ok) throw new Error("Failed to update review");
+
+  return response.json(); // ✅ Return updated review
+};
+
+
 // ✅ Helper to Get JWT Token
 const getAuthHeaders = () => {
   const token = localStorage.getItem("access_token");
