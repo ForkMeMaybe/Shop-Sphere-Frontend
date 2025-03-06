@@ -2,6 +2,22 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserInfo, updateUserInfo, sendOTP, verifyOTP } from "../api";
 import { useCsrfToken } from "../utils/csrftoken.jsx";
+import { 
+  User, 
+  Mail, 
+  Edit2, 
+  Check, 
+  X, 
+  Save, 
+  RefreshCw,
+  Shield, 
+  UserCircle,
+  AtSign,
+  Send,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
@@ -38,7 +54,7 @@ const Profile = () => {
       try {
         const data = await getUserInfo();
         setUser(data);
-        setOriginalUser(data); // ✅ Store original data for restoring on cancel
+        setOriginalUser(data);
       } catch (error) {
         console.error("Failed to load user info", error);
         if (error.message.includes("Failed to refresh token")) {
@@ -53,98 +69,76 @@ const Profile = () => {
     loadUserInfo();
   }, [token, navigate]);
 
-  // ✅ Handle input change
   const handleChange = (e) => {
-      const { name, value } = e.target;
-      setUser({ ...user, [name]: value });
+    const { name, value } = e.target;
+    setUser({ ...user, [name]: value });
+    setUpdatedFields((prev) => ({
+      ...prev,
+      [name]: value !== originalUser[name],
+    }));
+    if (name === "email" && otpVerified) {
+      setShowUpdateButton((prev) => ({ ...prev, email: true }));
+    }
+  };
 
-      // ✅ Check if the value is different from the original
-      setUpdatedFields((prev) => ({
-        ...prev,
-        [name]: value !== originalUser[name],
-      }));
-
-      // ✅ Show Update button only for email after verification
-      if (name === "email" && otpVerified) {
-        setShowUpdateButton((prev) => ({ ...prev, email: true }));
-      }
-    };
-
-
-  // ✅ Enable edit mode
   const handleEdit = (field) => {
-      setEditMode((prev) => ({
-        ...prev,
-        [field]: true, // ✅ Always allow edit mode
-      }));
+    setEditMode((prev) => ({
+      ...prev,
+      [field]: true,
+    }));
+    if (field === "email") {
+      setOtpVerified(false);
+      setOtpSent(false);
+      setOtp("");
+      setShowUpdateButton((prev) => ({ ...prev, email: false }));
+    }
+  };
 
-      // ✅ If editing email, reset OTP verification state
-      if (field === "email") {
-        setOtpVerified(false);
-        setOtpSent(false);
-        setOtp("");
-        setShowUpdateButton((prev) => ({ ...prev, email: false })); // Hide Update button until OTP is verified again
-      }
-    };
-
-  // ✅ Save button: Switches back to read-only and enables Update button
   const handleSave = (field) => {
-      setEditMode({ ...editMode, [field]: false });
+    setEditMode({ ...editMode, [field]: false });
+    if (user[field] !== originalUser[field]) {
+      setShowUpdateButton({ ...showUpdateButton, [field]: true });
+    }
+  };
 
-      // ✅ Show the Update button only if the value has changed
-      if (user[field] !== originalUser[field]) {
-        setShowUpdateButton({ ...showUpdateButton, [field]: true });
-      }
-    };
-
-
-  // ✅ Cancel button: Reverts to previous value
   const handleCancel = (field) => {
     setUser({ ...user, [field]: originalUser[field] });
     setEditMode({ ...editMode, [field]: false });
     setUpdatedFields({ ...updatedFields, [field]: false });
-
-    // ✅ Hide the Update button if the value wasn't changed
     setShowUpdateButton({ ...showUpdateButton, [field]: false });
   };
 
-  // ✅ PATCH request on Update button click
   const handleUpdate = async (field) => {
-      if (!user[field] || (field === "email" && !otpVerified)) return;
+    if (!user[field] || (field === "email" && !otpVerified)) return;
 
-      try {
-        await updateUserInfo(token, { [field]: user[field] });
-        setFieldMessages({ ...fieldMessages, [field]: "Updated successfully!" });
+    try {
+      await updateUserInfo(token, { [field]: user[field] });
+      setFieldMessages({ ...fieldMessages, [field]: "Updated successfully!" });
 
-        // ✅ Reset email verification states after successful update
-        if (field === "email") {
-          setOtpVerified(false); // Require OTP again
-          setOtpSent(false);
-          setOtp("");
-        }
-
-        // ✅ Once updated, reset original data and hide Update button
-        setOriginalUser({ ...originalUser, [field]: user[field] });
-        setUpdatedFields({ ...updatedFields, [field]: false });
-        setShowUpdateButton({ ...showUpdateButton, [field]: false });
-      } catch (error) {
-        setFieldMessages({ ...fieldMessages, [field]: "Failed to update." });
+      if (field === "email") {
+        setOtpVerified(false);
+        setOtpSent(false);
+        setOtp("");
       }
-    };
 
-  // ✅ Send OTP for email verification
+      setOriginalUser({ ...originalUser, [field]: user[field] });
+      setUpdatedFields({ ...updatedFields, [field]: false });
+      setShowUpdateButton({ ...showUpdateButton, [field]: false });
+    } catch (error) {
+      setFieldMessages({ ...fieldMessages, [field]: "Failed to update." });
+    }
+  };
+
   const handleSendOTP = async () => {
     setLoading(true);
     setError("");
-
-    console.log("Send OTP clicked for:", user.email); // ✅ Debug log
 
     try {
       const response = await fetch(`${API_BASE_URL}/send_otp/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken, // ✅ Send CSRF token
+          "X-CSRFToken": csrfToken,
         },
         credentials: "include",
         body: JSON.stringify({ email: user.email }),
@@ -157,16 +151,14 @@ const Profile = () => {
       setOtpSent(true);
       setOtp("");
       setFieldMessages({ ...fieldMessages, email: "OTP sent. Check your email!" });
-      console.log("OTP sent successfully"); // ✅ Debug log
     } catch (err) {
-      console.error("Error sending OTP:", err); // ✅ Check for any errors
+      console.error("Error sending OTP:", err);
       setError("Failed to send OTP. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Verify OTP before updating email
   const handleVerifyOTP = async () => {
     setLoading(true);
     setError("");
@@ -176,7 +168,7 @@ const Profile = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken, // ✅ Send CSRF token
+          "X-CSRFToken": csrfToken,
         },
         credentials: "include",
         body: JSON.stringify({ email: user.email, otp }),
@@ -199,167 +191,222 @@ const Profile = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-lg bg-white shadow-lg rounded-lg p-6 mt-10">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">My Profile</h2>
-
-      {error && <p className="text-center text-red-500 font-semibold">{error}</p>}
-
-      <form className="space-y-6">
-        {/* ✅ Username (Non-Editable) */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">Username</label>
-          <p className="p-3 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed">
-            {user.username}
-          </p>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* Profile Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6">
+          <div className="flex items-center space-x-4">
+            <UserCircle className="w-16 h-16 text-white" />
+            <div>
+              <h2 className="text-3xl font-bold text-white">My Profile</h2>
+              <p className="text-indigo-100 mt-1">Manage your account information</p>
+            </div>
+          </div>
         </div>
 
-        {["first_name", "last_name"].map((field) => (
-          <div key={field}>
-            <label className="block text-gray-700 font-semibold mb-1">
-              {field.replace("_", " ").toUpperCase()}
+        {error && (
+          <div className="mx-8 mt-6 flex items-center gap-2 text-red-500 bg-red-50 p-4 rounded-lg">
+            <AlertCircle className="w-5 h-5" />
+            <p className="font-medium">{error}</p>
+          </div>
+        )}
+
+        <div className="px-8 py-6 space-y-6">
+          {/* Username (Non-Editable) */}
+          <div>
+            <label className="flex items-center gap-2 text-gray-700 font-medium mb-2">
+              <User className="w-4 h-4" />
+              Username
             </label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                name={field}
-                value={user[field]}
-                onChange={handleChange}
-                disabled={!editMode[field]}
-                className="w-full p-3 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-300"
-              />
-              {!editMode[field] ? (
-                <button
-                  type="button"
-                  onClick={() => handleEdit(field)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
-                >
-                  Edit
-                </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => handleSave(field)}
-                    className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleCancel(field)}
-                    className="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-gray-500"
-                  >
-                    Cancel
-                  </button>
-                </>
+            <div className="p-4 bg-gray-50 rounded-lg text-gray-600 font-medium border border-gray-200">
+              {user.username}
+            </div>
+          </div>
+
+          {/* First Name & Last Name Fields */}
+          {["first_name", "last_name"].map((field) => (
+            <div key={field}>
+              <label className="flex items-center gap-2 text-gray-700 font-medium mb-2">
+                <User className="w-4 h-4" />
+                {field.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}
+              </label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    name={field}
+                    value={user[field]}
+                    onChange={handleChange}
+                    disabled={!editMode[field]}
+                    className={`w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900
+                      ${editMode[field] ? 'border-indigo-300 bg-white' : 'border-gray-200 bg-gray-50'}`}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  {!editMode[field] ? (
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(field)}
+                      className="flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      <span>Edit</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleSave(field)}
+                        className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Save</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCancel(field)}
+                        className="flex items-center gap-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                        <span>Cancel</span>
+                      </button>
+                    </>
+                  )}
+                  {showUpdateButton[field] && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate(field)}
+                      className="flex items-center gap-1 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Update</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+              {fieldMessages[field] && (
+                <p className="flex items-center gap-1 text-green-600 text-sm mt-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  {fieldMessages[field]}
+                </p>
               )}
-              {showUpdateButton[field] && (
+            </div>
+          ))}
+
+          {/* Email Field with OTP Verification */}
+          <div>
+            <label className="flex items-center gap-2 text-gray-700 font-medium mb-2">
+              <Mail className="w-4 h-4" />
+              Email
+            </label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <AtSign className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    name="email"
+                    value={user.email}
+                    onChange={handleChange}
+                    disabled={!editMode.email}
+                    className={`w-full pl-10 p-3 border border-gray-300 rounded-lg bg-white text-gray-900
+                      ${editMode.email ? 'border-indigo-300 bg-white' : 'border-gray-200 bg-gray-50'}`}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  {!editMode.email ? (
+                    <button
+                      type="button"
+                      onClick={() => handleEdit("email")}
+                      className="flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      <span>Edit</span>
+                    </button>
+                  ) : (
+                    <>
+                      {otpVerified && (
+                        <button
+                          type="button"
+                          onClick={() => handleSave("email")}
+                          className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>Save</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleCancel("email")}
+                        className="flex items-center gap-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                        <span>Cancel</span>
+                      </button>
+                      {!otpVerified && (
+                        <button
+                          type="button"
+                          onClick={handleSendOTP}
+                          disabled={otpSent || loading}
+                          className="flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                        >
+                          <Send className="w-4 h-4" />
+                          <span>{otpSent ? "OTP Sent" : "Send OTP"}</span>
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {otpSent && !otpVerified && (
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <Shield className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Enter OTP"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      className="w-full pl-10 p-3 border border-indigo-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleVerifyOTP}
+                    disabled={!otp || loading}
+                    className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Verify OTP</span>
+                  </button>
+                </div>
+              )}
+
+              {otpVerified && (
+                <p className="flex items-center gap-1 text-green-600 text-sm">
+                  <CheckCircle2 className="w-4 h-4" />
+                  OTP Verified Successfully!
+                </p>
+              )}
+
+              {showUpdateButton.email && (
                 <button
                   type="button"
-                  onClick={() => handleUpdate(field)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
+                  onClick={() => handleUpdate("email")}
+                  className="flex items-center gap-1 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
                 >
-                  Update
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Update Email</span>
                 </button>
               )}
             </div>
-            {fieldMessages[field] && <p className="text-green-500 text-sm">{fieldMessages[field]}</p>}
           </div>
-        ))}
-
-        {/* ✅ Email Field with OTP Verification */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">Email</label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="email"
-              name="email"
-              value={user.email}
-              onChange={handleChange}
-              disabled={!editMode.email}
-              className="w-full p-3 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-300"
-            />
-            {!editMode.email ? (
-              <button
-                type="button"
-                onClick={() => handleEdit("email")}
-                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
-              >
-                Edit
-              </button>
-            ) : (
-              <>
-                {/* ✅ Show Save button ONLY if OTP is verified */}
-                {otpVerified && (
-                  <button
-                    type="button"
-                    onClick={() => handleSave("email")}
-                    className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-                  >
-                    Save
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => handleCancel("email")}
-                  className="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-gray-500"
-                >
-                  Cancel
-                </button>
-                {!otpVerified && (
-                  <button
-                    type="button"
-                    onClick={handleSendOTP}
-                    disabled={otpSent}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 disabled:opacity-50"
-                  >
-                    {otpSent ? "OTP Sent" : "Send OTP"}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* ✅ Show OTP input and Verify button only when OTP is sent */}
-          {otpSent && !otpVerified && (
-            <div className="flex items-center space-x-2 mt-2">
-              <input
-                type="text"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-300"
-              />
-              <button
-                type="button"
-                onClick={handleVerifyOTP}
-                disabled={!otp}
-                className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 disabled:opacity-50"
-              >
-                Verify OTP
-              </button>
-            </div>
-          )}
-
-          {/* ✅ Show success message if OTP is verified */}
-          {otpVerified && <p className="text-green-500 text-sm mt-2">OTP Verified! ✅</p>}
-
-          {/* ✅ Show Update button after Save is clicked */}
-          {showUpdateButton.email && (
-            <button
-              type="button"
-              onClick={() => handleUpdate("email")}
-              className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 mt-2"
-            >
-              Update
-            </button>
-          )}
         </div>
-      </form>
+      </div>
     </div>
   );
 };
 
 export default Profile;
-
 

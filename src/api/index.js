@@ -249,7 +249,7 @@ export const addItemToCart = async (cartId, productId, quantity) => {
 export const updateCartItem = async (cartId, itemId, quantity) => {
   return secureFetch(`/store/carts/${cartId}/items/${itemId}/`, {
     method: "PATCH",
-    headers: { ...getAuthHeaders() },
+    headers: { "Content-Type": "application/json", },
     body: JSON.stringify({ quantity }),
   });
 };
