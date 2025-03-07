@@ -12,7 +12,8 @@ import {
   LogIn, 
   UserPlus, 
   ShoppingCart, 
-  Menu 
+  Menu,
+  Bug
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -89,6 +90,10 @@ const Navbar = () => {
                 <UserPlus className="h-5 w-5" />
                 <span>Register</span>
               </Link>
+              <Link to="/reportbug" className="flex items-center space-x-1 text-white hover:text-white/90 transition-colors">
+                  <Bug className="h-5 w-5" />
+                  <span>Bug</span>
+              </Link>
             </>
           )}
         </div>
@@ -97,6 +102,7 @@ const Navbar = () => {
         <button className="md:hidden text-white hover:text-white/90 transition-colors">
           <Menu className="h-6 w-6" />
         </button>
+
 
         {/* Cart Icon with Badge */}
         <Link to="/cart" className="relative ml-6 text-white hover:text-white/90 transition-colors">
@@ -107,6 +113,8 @@ const Navbar = () => {
             </span>
           )}
         </Link>
+
+
       </div>
     </nav>
   );
