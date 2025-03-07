@@ -2,6 +2,28 @@ import secureFetch from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+export const searchProducts = async (query) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/store/products/?search=${query}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch search results");
+    }
+
+    const data = await response.json();
+    return data.results; // ✅ Return only the product results
+  } catch (error) {
+    console.error("Error searching products:", error);
+    return [];
+  }
+};
+
+
 export const postReview = async (productId, reviewData) => {
   const token = localStorage.getItem("access_token");
 

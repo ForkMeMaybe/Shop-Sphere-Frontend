@@ -27,7 +27,7 @@ const Cart = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8 w-screen ">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
@@ -43,7 +43,7 @@ const Cart = () => {
             <p className="text-xl text-gray-500 mb-4">Your cart is empty</p>
             <Link 
               to="/" 
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              className="inline-flex items-center px-6 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
             >
               Continue Shopping
               <ArrowRight className="w-4 h-4 ml-2" />

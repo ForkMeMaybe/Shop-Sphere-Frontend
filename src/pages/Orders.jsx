@@ -84,7 +84,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-10 max-w-7xl">
+    <div className="bg-gray-50 mx-auto px-4 py-10 w-screen ">
       <div className="flex items-center justify-center gap-3 mb-10">
         <Package2 className="w-8 h-8 text-blue-600" />
         <h1 className="text-4xl font-bold text-gray-800">My Orders</h1>
