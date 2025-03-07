@@ -111,8 +111,8 @@ const Home = () => {
                 </Link>
 
                 {/* Product Info */}
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <div className="p-6 flex flex-col justify-between min-h-[200px]">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 min-h-[3rem] line-clamp-2">
                     <Link to={`/product/${product.id}`} className="hover:text-indigo-600 transition">
                       {product.title}
                     </Link>
