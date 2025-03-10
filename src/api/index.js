@@ -145,6 +145,17 @@ export const updateUserInfo = async (token, userData) => {
   });
 };
 
+export const updatePassword = async (token, userData) => {
+  return secureFetch("/auth/users/set_password/", {
+    method: "POST",  // ✅ Use PATCH to update only specific fields
+    headers: { 
+      "Content-Type": "application/json", 
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(userData),  // ✅ Convert object to JSON string
+  });
+};
+
 // ✅ Register a New User
 export const registerUser = async (userData) => {
   return secureFetch("/auth/users/", {

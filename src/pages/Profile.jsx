@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserInfo, updateUserInfo, sendOTP, verifyOTP } from "../api";
+import { getUserInfo, updateUserInfo, sendOTP, verifyOTP, updatePassword } from "../api";
 import { useCsrfToken } from "../utils/csrftoken.jsx";
 import { 
   User, 
@@ -15,7 +15,8 @@ import {
   AtSign,
   Send,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  KeyRound
 } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -31,7 +32,10 @@ const Profile = () => {
     first_name: "",
     last_name: "",
   });
-
+  const [passwords, setPasswords] = useState({
+    current_password: "",
+    new_password: ""
+  });
   const [originalUser, setOriginalUser] = useState({});
   const [editMode, setEditMode] = useState({});
   const [updatedFields, setUpdatedFields] = useState({});
@@ -81,6 +85,14 @@ const Profile = () => {
     }
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleEdit = (field) => {
     setEditMode((prev) => ({
       ...prev,
@@ -106,6 +118,12 @@ const Profile = () => {
     setEditMode({ ...editMode, [field]: false });
     setUpdatedFields({ ...updatedFields, [field]: false });
     setShowUpdateButton({ ...showUpdateButton, [field]: false });
+    if (field === "password") {
+      setPasswords({
+        current_password: "",
+        new_password: ""
+      });
+    }
   };
 
   const handleUpdate = async (field) => {
@@ -126,6 +144,31 @@ const Profile = () => {
       setShowUpdateButton({ ...showUpdateButton, [field]: false });
     } catch (error) {
       setFieldMessages({ ...fieldMessages, [field]: "Failed to update." });
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!passwords.current_password || !passwords.new_password) {
+      setError("Both current and new passwords are required");
+      return;
+    }
+
+    try {
+      // Send the passwords object directly to the updatePassword function
+      await updatePassword(token, {
+        current_password: passwords.current_password,
+        new_password: passwords.new_password
+      });
+      setFieldMessages({ ...fieldMessages, password: "Password updated successfully!" });
+      setEditMode({ ...editMode, password: false });
+      setPasswords({
+        current_password: "",
+        new_password: ""
+      });
+      setError("");
+    } catch (error) {
+      setFieldMessages({ ...fieldMessages, password: "Failed to update password." });
+      setError("Failed to update password. Please check your current password and try again.");
     }
   };
 
@@ -399,6 +442,86 @@ const Profile = () => {
                   <RefreshCw className="w-4 h-4" />
                   <span>Update Email</span>
                 </button>
+              )}
+            </div>
+          </div>
+
+          {/* Password Fields */}
+          <div>
+            <label className="flex items-center gap-2 text-gray-700 font-medium mb-2">
+              <Shield className="w-4 h-4" />
+              Password
+            </label>
+            <div className="space-y-3">
+              {!editMode.password ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <div className="p-4 bg-gray-50 rounded-lg text-gray-600 font-medium border border-gray-200">
+                      ••••••••
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditMode({ ...editMode, password: true })}
+                    className="flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <KeyRound className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                      <input
+                        type="password"
+                        name="current_password"
+                        placeholder="Current Password"
+                        value={passwords.current_password}
+                        onChange={handlePasswordChange}
+                        className="w-full pl-10 p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <Shield className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                      <input
+                        type="password"
+                        name="new_password"
+                        placeholder="New Password"
+                        value={passwords.new_password}
+                        onChange={handlePasswordChange}
+                        className="w-full pl-10 p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleUpdatePassword}
+                      className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Update Password</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCancel("password")}
+                      className="flex items-center gap-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Cancel</span>
+                    </button>
+                  </div>
+                </>
+              )}
+              {fieldMessages.password && (
+                <p className="flex items-center gap-1 text-green-600 text-sm mt-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  {fieldMessages.password}
+                </p>
               )}
             </div>
           </div>
