@@ -1,17 +1,22 @@
 // import { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { useAuth } from "../context/AuthContext";
-// import { Lock, User, ArrowRight } from 'lucide-react';
+// import { Lock, User, ArrowRight, Eye, EyeOff, Mail } from 'lucide-react';
 //
 // const Login = () => {
 //   const navigate = useNavigate();
 //   const { login } = useAuth();
 //
 //   const [credentials, setCredentials] = useState({ username: "", password: "" });
+//   const [showPassword, setShowPassword] = useState(false);
 //   const [error, setError] = useState("");
 //
 //   const handleChange = (e) => {
 //     setCredentials({ ...credentials, [e.target.name]: e.target.value });
+//   };
+//
+//   const togglePasswordVisibility = () => {
+//     setShowPassword(!showPassword);
 //   };
 //
 //   const handleSubmit = async (e) => {
@@ -68,14 +73,25 @@
 //                   <Lock className="w-5 h-5 text-gray-400" />
 //                 </div>
 //                 <input
-//                   type="password"
+//                   type={showPassword ? "text" : "password"}
 //                   name="password"
 //                   placeholder="Password"
 //                   value={credentials.password}
 //                   onChange={handleChange}
 //                   required
-//                   className="w-full pl-12 pr-4 py-3.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+//                   className="w-full pl-12 pr-12 py-3.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
 //                 />
+//                 <button
+//                   type="button"
+//                   onClick={togglePasswordVisibility}
+//                   className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors"
+//                 >
+//                   {showPassword ? (
+//                     <EyeOff className="w-5 h-5" />
+//                   ) : (
+//                     <Eye className="w-5 h-5" />
+//                   )}
+//                 </button>
 //               </div>
 //
 //               <button
@@ -99,7 +115,6 @@
 //             </div>
 //           </div>
 //         </div>
-//
 //       </div>
 //     </div>
 //   );
@@ -110,24 +125,10 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, ArrowRight, Eye, EyeOff, Mail } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -158,7 +159,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 w-screen ">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 w-screen">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header Section */}
@@ -212,11 +213,7 @@ const Login = () => {
                   onClick={togglePasswordVisibility}
                   className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
 
@@ -228,6 +225,15 @@ const Login = () => {
                   Sign In
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
                 </span>
+              </button>
+
+              {/* Password Reset Button */}
+              <button
+                type="button"
+                onClick={() => navigate("/reset-password")}
+                className="mt-4 w-full text-blue-600 hover:text-blue-700 font-medium text-center transition-colors"
+              >
+                Forgot Password?
               </button>
             </form>
 
@@ -247,3 +253,4 @@ const Login = () => {
 };
 
 export default Login;
+
