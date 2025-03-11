@@ -1,4 +1,6 @@
-# Live At: https://shop-sphere-frontend.onrender.com/
+## 🚀 Hosted At
+
+Access the live application frontend at: [https://shop-sphere-frontend.onrender.com/](https://shop-sphere-frontend.onrender.com/)
 
 # React + Vite
 
