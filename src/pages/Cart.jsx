@@ -134,7 +134,7 @@ const Cart = () => {
                   </Link>
                   <Link 
                     to="/checkout" 
-                    className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                    className="inline-flex items-center px-6 py-3 bg-green-600 !text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
                   >
                     Proceed to Checkout
                     <ArrowRight className="w-4 h-4 ml-2" />
