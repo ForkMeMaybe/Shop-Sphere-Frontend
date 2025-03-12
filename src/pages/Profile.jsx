@@ -16,7 +16,9 @@
 //   Send,
 //   CheckCircle2,
 //   AlertCircle,
-//   KeyRound
+//   KeyRound,
+//   Eye,
+//   EyeOff
 // } from 'lucide-react';
 //
 // const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -35,6 +37,10 @@
 //   const [passwords, setPasswords] = useState({
 //     current_password: "",
 //     new_password: ""
+//   });
+//   const [showPasswords, setShowPasswords] = useState({
+//     current_password: false,
+//     new_password: false
 //   });
 //   const [originalUser, setOriginalUser] = useState({});
 //   const [editMode, setEditMode] = useState({});
@@ -93,6 +99,13 @@
 //     }));
 //   };
 //
+//   const togglePasswordVisibility = (field) => {
+//     setShowPasswords(prev => ({
+//       ...prev,
+//       [field]: !prev[field]
+//     }));
+//   };
+//
 //   const handleEdit = (field) => {
 //     setEditMode((prev) => ({
 //       ...prev,
@@ -122,6 +135,10 @@
 //       setPasswords({
 //         current_password: "",
 //         new_password: ""
+//       });
+//       setShowPasswords({
+//         current_password: false,
+//         new_password: false
 //       });
 //     }
 //   };
@@ -154,7 +171,6 @@
 //     }
 //
 //     try {
-//       // Send the passwords object directly to the updatePassword function
 //       await updatePassword(token, {
 //         current_password: passwords.current_password,
 //         new_password: passwords.new_password
@@ -164,6 +180,10 @@
 //       setPasswords({
 //         current_password: "",
 //         new_password: ""
+//       });
+//       setShowPasswords({
+//         current_password: false,
+//         new_password: false
 //       });
 //       setError("");
 //     } catch (error) {
@@ -475,26 +495,48 @@
 //                     <div className="flex-1 relative">
 //                       <KeyRound className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
 //                       <input
-//                         type="password"
+//                         type={showPasswords.current_password ? "text" : "password"}
 //                         name="current_password"
 //                         placeholder="Current Password"
 //                         value={passwords.current_password}
 //                         onChange={handlePasswordChange}
-//                         className="w-full pl-10 p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
+//                         className="w-full pl-10 pr-10 p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
 //                       />
+//                       <button
+//                         type="button"
+//                         onClick={() => togglePasswordVisibility('current_password')}
+//                         className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+//                       >
+//                         {showPasswords.current_password ? (
+//                           <EyeOff className="w-4 h-4" />
+//                         ) : (
+//                           <Eye className="w-4 h-4" />
+//                         )}
+//                       </button>
 //                     </div>
 //                   </div>
 //                   <div className="flex items-center gap-2">
 //                     <div className="flex-1 relative">
 //                       <Shield className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
 //                       <input
-//                         type="password"
+//                         type={showPasswords.new_password ? "text" : "password"}
 //                         name="new_password"
 //                         placeholder="New Password"
 //                         value={passwords.new_password}
 //                         onChange={handlePasswordChange}
-//                         className="w-full pl-10 p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
+//                         className="w-full pl-10 pr-10 p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
 //                       />
+//                       <button
+//                         type="button"
+//                         onClick={() => togglePasswordVisibility('new_password')}
+//                         className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+//                       >
+//                         {showPasswords.new_password ? (
+//                           <EyeOff className="w-4 h-4" />
+//                         ) : (
+//                           <Eye className="w-4 h-4" />
+//                         )}
+//                       </button>
 //                     </div>
 //                   </div>
 //                   <div className="flex gap-2">
@@ -540,18 +582,9 @@
 
 
 
-
-
-
-
-
-
-
-
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserInfo, updateUserInfo, sendOTP, verifyOTP, updatePassword } from "../api";
+import { getUserInfo, updateUserInfo, sendOTP, verifyOTP, updatePassword, registerCustomer, getCustomerInfo } from "../api";
 import { useCsrfToken } from "../utils/csrftoken.jsx";
 import { 
   User, 
@@ -569,7 +602,10 @@ import {
   AlertCircle,
   KeyRound,
   Eye,
-  EyeOff
+  EyeOff,
+  Phone,
+  Calendar,
+  Medal
 } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -585,6 +621,17 @@ const Profile = () => {
     first_name: "",
     last_name: "",
   });
+
+  // New customer state
+  const [customer, setCustomer] = useState({
+    phone: "",
+    birth_date: "",
+    membership: "B" // Default to Bronze
+  });
+  const [originalCustomer, setOriginalCustomer] = useState({});
+  const [customerEditMode, setCustomerEditMode] = useState(false);
+  const [customerMessage, setCustomerMessage] = useState("");
+
   const [passwords, setPasswords] = useState({
     current_password: "",
     new_password: ""
@@ -613,9 +660,18 @@ const Profile = () => {
       }
 
       try {
-        const data = await getUserInfo();
-        setUser(data);
-        setOriginalUser(data);
+        const userData = await getUserInfo();
+        setUser(userData);
+        setOriginalUser(userData);
+
+        // Fetch customer info
+        try {
+          const customerData = await getCustomerInfo();
+          setCustomer(customerData);
+          setOriginalCustomer(customerData);
+        } catch (error) {
+          console.warn("No customer profile found", error);
+        }
       } catch (error) {
         console.error("Failed to load user info", error);
         if (error.message.includes("Failed to refresh token")) {
@@ -804,8 +860,38 @@ const Profile = () => {
     }
   };
 
+  // New customer handlers
+  const handleCustomerChange = (e) => {
+    const { name, value } = e.target;
+    setCustomer(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCustomerEdit = () => {
+    setCustomerEditMode(true);
+  };
+
+  const handleCustomerCancel = () => {
+    setCustomer(originalCustomer);
+    setCustomerEditMode(false);
+    setCustomerMessage("");
+  };
+
+  const handleCustomerSave = async () => {
+    try {
+      await registerCustomer(token, customer);
+      setOriginalCustomer(customer);
+      setCustomerEditMode(false);
+      setCustomerMessage("Customer profile updated successfully!");
+    } catch (error) {
+      setError("Failed to update customer profile");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
         {/* Profile Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6">
@@ -1116,6 +1202,121 @@ const Profile = () => {
                   {fieldMessages.password}
                 </p>
               )}
+            </div>
+          </div>
+
+          {/* Customer Information Section */}
+          <div className="border-t pt-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Medal className="w-5 h-5 text-indigo-600" />
+              Customer Information
+            </h3>
+
+            <div className="space-y-4">
+              {customerMessage && (
+                <div className="flex items-center gap-2 text-green-600 bg-green-50 p-4 rounded-lg">
+                  <CheckCircle2 className="w-5 h-5" />
+                  <p>{customerMessage}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Phone Number */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={customer.phone}
+                      onChange={handleCustomerChange}
+                      disabled={!customerEditMode}
+                      className={`w-full pl-10 p-3 border rounded-lg text-gray-900 ${
+                        customerEditMode 
+                          ? 'border-indigo-300 bg-white' 
+                          : 'border-gray-200 bg-gray-50'
+                      }`}
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+                </div>
+
+                {/* Birth Date */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <input
+                      type="date"
+                      name="birth_date"
+                      value={customer.birth_date}
+                      onChange={handleCustomerChange}
+                      disabled={!customerEditMode}
+                      className={`w-full pl-10 p-3 border rounded-lg text-gray-900 ${
+                        customerEditMode 
+                          ? 'border-indigo-300 bg-white' 
+                          : 'border-gray-200 bg-gray-50'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Membership */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Membership</label>
+                  <div className="relative">
+                    <Medal className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <select
+                      name="membership"
+                      value={customer.membership}
+                      onChange={handleCustomerChange}
+                      disabled={!customerEditMode}
+                      className={`w-full pl-10 p-3 border rounded-lg appearance-none text-gray-900 ${
+                        customerEditMode 
+                          ? 'border-indigo-300 bg-white' 
+                          : 'border-gray-200 bg-gray-50'
+                      }`}
+                    >
+                      <option value="B">Bronze</option>
+                      <option value="S">Silver</option>
+                      <option value="G">Gold</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 mt-4">
+                  {!customerEditMode ? (
+                    <button
+                      type="button"
+                      onClick={handleCustomerEdit}
+                      className="flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      <span>Edit Customer Info</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleCustomerSave}
+                        className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Save Changes</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCustomerCancel}
+                        className="flex items-center gap-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                        <span>Cancel</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -164,6 +164,27 @@ export const registerUser = async (userData) => {
   });
 };
 
+export const registerCustomer = async (token, userData) => {
+  return secureFetch("/store/customers/me/", {
+    method: "PUT",
+    headers: { 
+      "Content-Type": "application/json", 
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(userData),
+  });
+};
+
+export const getCustomerInfo = async () => {
+  const response = await secureFetch("/store/customers/me/", {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) throw new Error("Failed to fetch customer info");
+
+  return response.json(); 
+};
+
 // ✅ Get User Info (Fix: Convert response to JSON)
 export const getUserInfo = async () => {
   const response = await secureFetch("/auth/users/me/", {

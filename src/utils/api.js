@@ -62,7 +62,7 @@ const secureFetch = async (url, options = {}) => {
   let csrfToken = localStorage.getItem("csrftoken");
 
   if (!csrfToken) {
-    csrfToken = await refreshCsrfToken();
+    csrfToken = await refreshCsrfTokenbronze();
   }
 
   let headers = {
