@@ -77,7 +77,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product) => {
     let storedCartId = localStorage.getItem("cartId");
 
-    if (!storedCartId || storedCartId === "undefined") {
+    if (!storedCartId || storedCartId === "undefined" || storedCartId === "null") {
       console.warn("Cart ID missing, creating a new cart...");
       await createAndStoreNewCart();
       storedCartId = localStorage.getItem("cartId"); // Fetch the new cart ID
