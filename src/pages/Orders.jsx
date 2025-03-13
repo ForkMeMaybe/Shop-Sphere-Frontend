@@ -147,7 +147,7 @@ const Orders = () => {
                         <h4 className="font-medium text-gray-900 mb-1">{item.product.title}</h4>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <p>Quantity: {item.quantity}</p>
-                          <p className="font-semibold text-blue-600">${item.unit_price.toFixed(2)}</p>
+                          <p className="font-semibold text-blue-600">₹{item.unit_price.toFixed(2)}</p>
                         </div>
                       </div>
                     </div>
