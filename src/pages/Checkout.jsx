@@ -282,7 +282,7 @@ const Checkout = () => {
             "Content-Type": "application/json",
             Authorization: `JWT ${token}`,
           },
-          body: JSON.stringify({ cart_id: cartId }), // 🔥 Pass cart_id to place the order
+            body: JSON.stringify({ cart_id: cartId, payment_status: "C" }), // 🔥 Pass cart_id to place the order
         });
 
         if (!orderResponse.ok) throw new Error("Failed to place order");
