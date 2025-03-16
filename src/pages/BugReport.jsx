@@ -21,7 +21,7 @@ const BugReport = () => {
             </p>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex gap-3 justify-center">
             <a
               href="https://github.com/ForkMeMaybe/Shop-Sphere-Frontend/issues/new"
               target="_blank"
@@ -29,7 +29,16 @@ const BugReport = () => {
               className="inline-flex items-center gap-2 bg-[#24292F] text-white px-8 py-4 rounded-lg hover:bg-[#1b1f23] transition-colors"
             >
               <Github className="w-6 h-6" />
-              <span className="font-semibold">Create Issue on GitHub</span>
+              <span className="font-semibold text-center">Create Issue on GitHub (Frontend)</span>
+            </a>
+            <a
+              href="https://github.com/ForkMeMaybe/Shop-Sphere/issues/new"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#24292F] text-white px-8 py-4 rounded-lg hover:bg-[#1b1f23] transition-colors"
+            >
+              <Github className="w-6 h-6" />
+              <span className="font-semibold text-center">Create Issue on GitHub (Backend)</span>
             </a>
           </div>
 

@@ -133,18 +133,19 @@ const Register = () => {
 
       const data = await response.json();
       if (response.ok) {
-        navigate("/login");
-      } else {
-        if (data.errors) {
-          setFieldErrors(data.errors);
+          navigate("/login");
+        } else {
+          if (data && typeof data === "object") {
+            setFieldErrors(data); // ✅ Set field-specific errors directly
+          } else {
+            setError(data.error || "Registration failed"); // ✅ Set generic error if not field-specific
+          }
         }
-        setError(data.error || "Registration failed");
+      } catch {
+        setError("An error occurred during registration");
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      setError("An error occurred during registration");
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
@@ -196,7 +197,7 @@ const Register = () => {
                 />
               </div>
               {fieldErrors.username && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.username}</p>
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.username[0]}</p>
               )}
             </div>
 
@@ -327,13 +328,16 @@ const Register = () => {
                   onClick={() => togglePasswordVisibility('password')}
                   className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                 >
-                  {showPasswords.password ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                  {showPasswords.password ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <div className="mt-1 text-sm text-red-600 space-y-1">
+                  {fieldErrors.password.map((err, index) => (
+                    <p key={index}>⚠️ {err}</p>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>
