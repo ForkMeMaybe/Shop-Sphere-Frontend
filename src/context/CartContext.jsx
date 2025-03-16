@@ -38,6 +38,7 @@ export const CartProvider = ({ children }) => {
       } catch (error) {
         console.error("❌ Failed to create a new cart:", error);
         alert("Error creating cart. Please try again.");
+        window.location.reload();
       }
     };
 
