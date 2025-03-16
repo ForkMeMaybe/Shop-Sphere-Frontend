@@ -2,6 +2,106 @@ import secureFetch from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+// ✅ Fetch Addresses for the Authenticated User
+export const fetchAddress = async () => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Authentication required to fetch addresses.");
+  }
+
+  // Fetch the logged-in user's customer ID
+  const userResponse = await secureFetch("/store/customers/me/", {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!userResponse.ok) throw new Error("Failed to fetch customer details");
+
+  const userData = await userResponse.json();
+  const customerId = userData.id;
+
+  // Fetch addresses using the customer ID
+  const response = await secureFetch(`/store/customers/${customerId}/addresses/`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) throw new Error("Failed to fetch addresses");
+
+  return response.json();
+};
+
+// ✅ Add a New Address for the Logged-in User
+export const addAddress = async (addressData) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Authentication required to add an address.");
+  }
+
+  // Fetch the logged-in user's customer ID
+  const userResponse = await secureFetch("/store/customers/me/", {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!userResponse.ok) throw new Error("Failed to fetch customer details");
+
+  const userData = await userResponse.json();
+  const customerId = userData.id;
+
+  // Add an address using the customer ID
+  const response = await secureFetch(`/store/customers/${customerId}/addresses/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({
+        ...addressData,
+        customer: customerId,  // 🔥 Explicitly adding customer ID
+      }),
+    });
+
+
+  if (!response.ok) throw new Error("Failed to add address");
+
+  return response.json();
+};
+
+
+// ✅ Update an Existing Address for the Logged-in User
+export const updateAddress = async (addressId, updatedData) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Authentication required to update an address.");
+  }
+
+  // Fetch the logged-in user's customer ID
+  const userResponse = await secureFetch("/store/customers/me/", {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!userResponse.ok) throw new Error("Failed to fetch customer details");
+
+  const userData = await userResponse.json();
+  const customerId = userData.id;
+
+  // Update the address using the customer ID and address ID
+  const response = await secureFetch(`/store/customers/${customerId}/addresses/${addressId}/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(updatedData),
+  });
+
+  if (!response.ok) throw new Error("Failed to update address");
+
+  return response.json();
+};
+
+
 export const searchProducts = async (query) => {
   try {
     const response = await fetch(`${API_BASE_URL}/store/products/?search=${query}`, {
