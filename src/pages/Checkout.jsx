@@ -340,11 +340,12 @@
 
 
 
-
+import { getUserInfo, getCustomerInfo } from "../api";
 import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { fetchCart } from "../api";
+import { useAuth } from "../context/AuthContext";
 import { 
   ShoppingCart, 
   Package, 
@@ -363,12 +364,49 @@ import {
 } from "lucide-react";
 
 const Checkout = () => {
+  const { user, logout } = useAuth();
   const { cartId, cartItems, totalPrice, setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
   const [isPayNowLoading, setIsPayNowLoading] = useState(false);
   const [isCODLoading, setIsCODLoading] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+      const fn = async () => {
+
+          // 🔹 Only proceed if user is logged in
+          if (!user) return;
+
+          // 🔹 Fetch user details dynamically
+          const [userInfo, customerInfo] = await Promise.all([getUserInfo(), getCustomerInfo()]);
+
+          if (!userInfo || !customerInfo) {
+              console.warn("Skipping lead submission due to missing user details.");
+              return;
+          }
+
+          // 🔹 Construct lead payload
+          const leadData = {
+              email: userInfo.email || "",
+              name: userInfo.first_name || "",
+              phone: customerInfo.phone || "",
+              source: "website",
+              engagement_level: 0,
+          };
+
+          // 🔹 Send lead data after search
+          await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/`, {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify(leadData),
+          });
+      }
+
+      fn()
+  }, [user])
 
   useEffect(() => {
     const fetchCartData = async () => {

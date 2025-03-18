@@ -2,15 +2,52 @@ import { useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "../api";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {useEffect} from "react"; 
 import { CartContext } from "../context/CartContext";
 import { ShoppingBag, Star, TrendingUp, Package, ShoppingCart, Heart, Eye } from "lucide-react";
+import { getUserInfo, getCustomerInfo } from "../api";
 
 const Home = () => {
+    const { user, logout } = useAuth();
   const cartContext = useContext(CartContext);
   if (!cartContext) {
     return <h2 className="text-center text-red-500 text-xl mt-10">Error: CartContext is not available.</h2>;
   }
 
+  useEffect(() => {
+      const fn = async () => {
+          // 🔹 Only proceed if user is logged in
+              if (!user) return;
+
+          // 🔹 Fetch user details dynamically
+          const [userInfo, customerInfo] = await Promise.all([getUserInfo(), getCustomerInfo()]);
+
+          if (!userInfo || !customerInfo) {
+              console.warn("Skipping lead submission due to missing user details.");
+              return;
+          }
+
+          // 🔹 Construct lead payload
+          const leadData = {
+              email: userInfo.email || "",
+              name: userInfo.first_name || "",
+              phone: customerInfo.phone || "",
+              source: "website",
+              engagement_level: 0,
+          };
+
+          // 🔹 Send lead data after search
+          await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/`, {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify(leadData),
+          });
+      } 
+      fn()
+  }, [user])
   const { addToCart } = cartContext;
 
   // ✅ Fetch products using useQuery

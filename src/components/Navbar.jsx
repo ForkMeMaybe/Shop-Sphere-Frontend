@@ -3,6 +3,7 @@ import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { searchProducts } from "../api";
+import { getUserInfo, getCustomerInfo } from "../api";
 import { 
   ShoppingBag, 
   Search, 
@@ -25,20 +26,67 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
+  // const handleSearch = async (e) => {
+  //   if (e.key === "Enter" || e.type === "click") {
+  //     if (searchQuery.trim()) {
+  //       try {
+  //         const results = await searchProducts(searchQuery);
+  //         navigate("/search", { state: { results, query: searchQuery } });
+  //         setIsMobileSearchOpen(false);
+  //         setSearchQuery("");
+  //       } catch (error) {
+  //         console.error("Search failed:", error);
+  //       }
+  //     }
+  //   }
+  // };
+
   const handleSearch = async (e) => {
-    if (e.key === "Enter" || e.type === "click") {
-      if (searchQuery.trim()) {
-        try {
-          const results = await searchProducts(searchQuery);
-          navigate("/search", { state: { results, query: searchQuery } });
-          setIsMobileSearchOpen(false);
-          setSearchQuery("");
-        } catch (error) {
-          console.error("Search failed:", error);
+      if (e.key === "Enter" || e.type === "click") {
+        if (searchQuery.trim()) {
+          try {
+            // 🔹 Perform product search
+            const results = await searchProducts(searchQuery);
+            navigate("/search", { state: { results, query: searchQuery } });
+            setIsMobileSearchOpen(false);
+            setSearchQuery("");
+
+            // 🔹 Only proceed if user is logged in
+            if (!user) return;
+
+            // 🔹 Fetch user details dynamically
+            const [userInfo, customerInfo] = await Promise.all([getUserInfo(), getCustomerInfo()]);
+
+            if (!userInfo || !customerInfo) {
+              console.warn("Skipping lead submission due to missing user details.");
+              return;
+            }
+
+            // 🔹 Construct lead payload
+            const leadData = {
+              email: userInfo.email || "",
+              name: userInfo.first_name || "",
+              phone: customerInfo.phone || "",
+              source: "website",
+              engagement_level: 1,
+            };
+
+            // 🔹 Send lead data after search
+            await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(leadData),
+            });
+
+          } catch (error) {
+            console.error("Search or lead submission failed:", error);
+          }
         }
       }
-    }
-  };
+    };
+
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
