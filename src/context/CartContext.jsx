@@ -1,9 +1,12 @@
 import { createContext, useState, useEffect } from "react";
 import { createCart, fetchCart, addItemToCart, removeCartItem } from "../api";
+import { useAuth } from "../context/AuthContext";
+import { getUserInfo, getCustomerInfo } from "../api";
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
+    const { user, logout } = useAuth();
   // ✅ Get stored cart ID safely
   const getStoredCartId = () => {
     const storedCartId = localStorage.getItem("cartId");
@@ -76,6 +79,36 @@ export const CartProvider = ({ children }) => {
 
   // ✅ Add Item to Cart
   const addToCart = async (product) => {
+      // 🔹 Only proceed if user is logged in
+              if (!user) return;
+
+          // 🔹 Fetch user details dynamically
+          const [userInfo, customerInfo] = await Promise.all([getUserInfo(), getCustomerInfo()]);
+
+          if (!userInfo || !customerInfo) {
+              console.warn("Skipping lead submission due to missing user details.");
+              return;
+          }
+
+          // 🔹 Construct lead payload
+          const leadData = {
+              email: userInfo.email || "",
+              name: userInfo.first_name || "",
+              phone: customerInfo.phone || "",
+              source: "website",
+              engagement_level: 2,
+          };
+
+          // 🔹 Send lead data after search
+          await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/`, {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify(leadData),
+          });
+
+
     let storedCartId = localStorage.getItem("cartId");
 
     if (!storedCartId || storedCartId === "undefined" || storedCartId === "null") {
