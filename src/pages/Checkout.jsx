@@ -392,7 +392,7 @@ const Checkout = () => {
               name: userInfo.first_name || "",
               phone: customerInfo.phone || "",
               source: "website",
-              engagement_level: 0,
+              engagement_level: 3,
           };
 
           // 🔹 Send lead data after search

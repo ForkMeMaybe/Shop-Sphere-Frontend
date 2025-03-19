@@ -80,7 +80,7 @@ export const CartProvider = ({ children }) => {
   // ✅ Add Item to Cart
   const addToCart = async (product) => {
       // 🔹 Only proceed if user is logged in
-              if (!user) return;
+          if (!user) return;
 
           // 🔹 Fetch user details dynamically
           const [userInfo, customerInfo] = await Promise.all([getUserInfo(), getCustomerInfo()]);
@@ -97,6 +97,7 @@ export const CartProvider = ({ children }) => {
               phone: customerInfo.phone || "",
               source: "website",
               engagement_level: 2,
+              products: [product.id]
           };
 
           // 🔹 Send lead data after search
@@ -127,17 +128,62 @@ export const CartProvider = ({ children }) => {
   };
 
   // ✅ Remove Item from Cart
+  // const removeFromCart = async (itemId) => {
+  //   try {
+  //     if (!cartId) return;
+
+  //     console.log(`Removing item ${itemId} from cart...`);
+  //     await removeCartItem(cartId, itemId);
+  //     fetchCartData(); // ✅ Refresh cart data
+  //   } catch (error) {
+  //     console.error("Error removing item from cart:", error);
+  //   }
+  // };
   const removeFromCart = async (itemId) => {
     try {
       if (!cartId) return;
-
+  
       console.log(`Removing item ${itemId} from cart...`);
       await removeCartItem(cartId, itemId);
       fetchCartData(); // ✅ Refresh cart data
+  
+      // 🔹 Only proceed if user is logged in
+      if (!user) return;
+  
+      // 🔹 Fetch user details dynamically
+      const userInfo = await getUserInfo();
+      if (!userInfo || !userInfo.email) {
+        console.warn("Skipping lead deletion due to missing user details.");
+        return;
+      }
+  
+      // 🔹 Fetch leads to find matching lead entry
+      const leadsResponse = await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/`);
+      const leads = await leadsResponse.json();
+  
+      // 🔹 Find the lead that matches the user's email & engagement_level 2
+      const leadToDelete = leads.find(
+        (lead) => lead.email === userInfo.email && lead.engagement_level === 2
+      );
+
+      console.log(leadToDelete);
+  
+      if (!leadToDelete) {
+        console.warn("No matching lead found for removal.");
+        return;
+      }
+  
+      // 🔹 Send DELETE request to remove the lead
+      await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/${leadToDelete.id}/`, {
+        method: "DELETE",
+      });
+  
+      console.log(`✅ Lead with ID ${leadToDelete.id} removed successfully.`);
     } catch (error) {
       console.error("Error removing item from cart:", error);
     }
   };
+  
 
   return (
     <CartContext.Provider value={{ cartId, cartItems, setCartItems, totalPrice, addToCart, removeFromCart }}>

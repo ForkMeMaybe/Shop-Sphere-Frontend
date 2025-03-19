@@ -69,7 +69,10 @@ const Navbar = () => {
               phone: customerInfo.phone || "",
               source: "website",
               engagement_level: 1,
+              products: results.map(res => res.id)
             };
+
+            console.log(leadData.products)
 
             // 🔹 Send lead data after search
             await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/`, {
