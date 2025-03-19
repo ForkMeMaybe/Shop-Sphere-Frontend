@@ -420,6 +420,45 @@ const Checkout = () => {
     fetchCartData();
   }, [cartId]);
 
+
+  const deleteLeadAfterPurchase = async () => {
+    try {
+      if (!user) return;
+  
+      const userInfo = await getUserInfo();
+      if (!userInfo || !userInfo.email) {
+        console.warn("Skipping lead deletion due to missing user details.");
+        return;
+      }
+  
+      // Fetch all leads
+      const leadsResponse = await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/`);
+      const leads = await leadsResponse.json();
+  
+      // Find the lead matching the user's email and engagement_level 3
+      const leadToDelete = leads.find(
+        (lead) => lead.email === userInfo.email && lead.engagement_level === 3
+      );
+  
+      if (!leadToDelete) {
+        console.warn("No matching lead found for removal.");
+        return;
+      }
+  
+      // Send DELETE request to remove the lead
+      await fetch(`${import.meta.env.VITE_API_URL}/lead/leads/${leadToDelete.id}/`, {
+        method: "DELETE",
+      });
+  
+      console.log(`✅ Lead with ID ${leadToDelete.id} removed successfully.`);
+    } catch (error) {
+      console.error("Error deleting lead after purchase:", error);
+    }
+  };
+
+  
+  
+
   const loadRazorpay = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
@@ -437,25 +476,25 @@ const Checkout = () => {
 
   const handlePlaceOrder = async () => {
     const token = localStorage.getItem("access_token");
-
+  
     if (!token) {
       alert("You must log in to place an order.");
       navigate("/login");
       return;
     }
-
+  
     if (!cartId) {
       setError("No cart found.");
       return;
     }
-
+  
     setIsPayNowLoading(true);
     setError("");
-
+  
     try {
       const razorpayLoaded = await loadRazorpay();
       if (!razorpayLoaded) throw new Error("Failed to load Razorpay");
-
+  
       const response = await fetch(`${import.meta.env.VITE_API_URL}/store/payments/`, {
         method: "POST",
         headers: {
@@ -464,11 +503,11 @@ const Checkout = () => {
         },
         body: JSON.stringify({ amount: totalPrice }),
       });
-
+  
       if (!response.ok) throw new Error("Failed to create payment order");
-
+  
       const paymentData = await response.json();
-
+  
       const options = {
         key: paymentData.razorpay_merchant_key,
         amount: paymentData.razorpay_amount,
@@ -479,7 +518,7 @@ const Checkout = () => {
         handler: async function (response) {
           console.log("Payment Success:", response);
           setIsProcessingPayment(true);
-
+  
           const verifyResponse = await fetch(
             `${import.meta.env.VITE_API_URL}/store/payments-handler/`,
             {
@@ -488,9 +527,9 @@ const Checkout = () => {
               body: JSON.stringify(response),
             }
           );
-
+  
           if (!verifyResponse.ok) throw new Error("Payment verification failed");
-
+  
           const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/store/orders/`, {
             method: "POST",
             headers: {
@@ -499,11 +538,14 @@ const Checkout = () => {
             },
             body: JSON.stringify({ cart_id: cartId, payment_status: "C" }),
           });
-
+  
           if (!orderResponse.ok) throw new Error("Failed to place order");
-
+  
           console.log("✅ Order placed successfully:", await orderResponse.json());
-
+  
+          // 🔹 Delete the lead after successful purchase
+          await deleteLeadAfterPurchase();
+  
           setTimeout(() => {
             setIsProcessingPayment(false);
             localStorage.removeItem("cartId");
@@ -519,7 +561,7 @@ const Checkout = () => {
         },
         theme: { color: "#4F46E5" },
       };
-
+  
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
@@ -529,24 +571,25 @@ const Checkout = () => {
       setIsPayNowLoading(false);
     }
   };
+  
 
   const handleCODOrder = async () => {
     const token = localStorage.getItem("access_token");
-
+  
     if (!token) {
       alert("You must log in to place an order.");
       navigate("/login");
       return;
     }
-
+  
     if (!cartId) {
       setError("No cart found.");
       return;
     }
-
+  
     setIsCODLoading(true);
     setError("");
-
+  
     try {
       const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/store/orders/`, {
         method: "POST",
@@ -556,11 +599,14 @@ const Checkout = () => {
         },
         body: JSON.stringify({ cart_id: cartId, payment_status: "P" }),
       });
-
+  
       if (!orderResponse.ok) throw new Error("Failed to place order");
-
+  
       console.log("✅ COD Order placed successfully:", await orderResponse.json());
-
+  
+      // 🔹 Delete the lead after successful COD order
+      await deleteLeadAfterPurchase();
+  
       setTimeout(() => {
         setIsCODLoading(false);
         localStorage.removeItem("cartId");
@@ -574,6 +620,7 @@ const Checkout = () => {
       setIsCODLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
