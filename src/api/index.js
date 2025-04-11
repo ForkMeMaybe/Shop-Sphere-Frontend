@@ -428,21 +428,44 @@ export const removeCartItem = async (cartId, itemId) => {
 };
 
 // ✅ Fetch All Products
-export const fetchProducts = async () => {
+// export const fetchProducts = async () => {
+//   try {
+//     const response = await secureFetch("/store/products/");
+//     const data = await response.json();
+
+//     if (!data || !Array.isArray(data.results)) {
+//       throw new Error("Unexpected API response");
+//     }
+
+//     return data.results;
+//   } catch (error) {
+//     console.error("Error fetching products:", error);
+//     return [];
+//   }
+// };
+
+export const fetchProducts = async (page = 1, pageSize = 8) => {
   try {
-    const response = await secureFetch("/store/products/");
+    const response = await secureFetch(`/store/products/?page=${page}&page_size=${pageSize}`);
     const data = await response.json();
 
     if (!data || !Array.isArray(data.results)) {
       throw new Error("Unexpected API response");
     }
 
-    return data.results;
+    return {
+      products: data.results,
+      total: data.count, // total product count for pagination
+    };
   } catch (error) {
     console.error("Error fetching products:", error);
-    return [];
+    return {
+      products: [],
+      total: 0,
+    };
   }
 };
+
 
 // ✅ Fetch Product Details
 export const fetchProductDetail = async (id) => {
