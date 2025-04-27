@@ -80,34 +80,35 @@ const Register = () => {
   };
 
   const handleVerifyOTP = async () => {
-    setLoading(true);
-    setError("");
-    setOtpMessage("");
+  setLoading(true);
+  setError("");
+  setOtpMessage("");
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/verify_otp/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        credentials: "include",
-        body: JSON.stringify({ email: formData.email, otp }),
-      });
+  try {
+    const response = await fetch(`${API_BASE_URL}/verify_otp/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken,
+      },
+      credentials: "include",
+      body: JSON.stringify({ email: formData.email, otp }),
+    });
 
-      const data = await response.json();
-      if (response.ok) {
-        setOtpVerified(true);
-        setOtpMessage("Email verified successfully!");
-      } else {
-        setError(data.error || "Invalid OTP");
-      }
-    } catch {
-      setError("An error occurred while verifying OTP");
-    } finally {
-      setLoading(false);
+    const data = await response.json();
+
+    if (data.success) { // Check if success is true
+      setOtpVerified(true);
+      setOtpMessage("Email verified successfully!");
+    } else {
+      setError(data.message || "Invalid OTP"); // Use the message returned from the backend
     }
-  };
+  } catch {
+    setError("An error occurred while verifying OTP");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
