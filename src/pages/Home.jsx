@@ -1,44 +1,53 @@
-// import { useContext } from "react";
+// import { useContext, useState } from "react";
 // import { useQuery } from "@tanstack/react-query";
 // import { fetchProducts } from "../api";
 // import { Link } from "react-router-dom";
 // import { CartContext } from "../context/CartContext";
-// import { ShoppingBag, Star, TrendingUp, Package, ShoppingCart, Heart, Eye } from "lucide-react";
-
+// import { ShoppingBag, Star, Package, ShoppingCart, Heart, Eye } from "lucide-react";
+//
+// const PRODUCTS_PER_PAGE = 8;
+//
 // const Home = () => {
 //   const cartContext = useContext(CartContext);
+//   const [page, setPage] = useState(1);
+//
 //   if (!cartContext) {
 //     return <h2 className="text-center text-red-500 text-xl mt-10">Error: CartContext is not available.</h2>;
 //   }
-
+//
 //   const { addToCart } = cartContext;
-
-//   // ✅ Fetch products using useQuery
-//   const { data: products, isLoading, error } = useQuery({
-//       queryKey: ["products"],
-//       queryFn: fetchProducts,
-//       refetchOnWindowFocus: false,  // ❌ Prevents refetching when switching tabs
-//       staleTime: 1000 * 60 * 5,      // 🕒 Cache data for 5 minutes
-//     });
-
-
+//
+//   const {
+//     data,
+//     isLoading,
+//     error,
+//   } = useQuery({
+//     queryKey: ["products", page],
+//     queryFn: () => fetchProducts(page, PRODUCTS_PER_PAGE),
+//     keepPreviousData: true,
+//     staleTime: 1000 * 60 * 5,
+//   });
+//
 //   if (isLoading)
 //     return (
-//       <div className="flex items-center justify-center min-h-screen w-screen ">
+//       <div className="flex items-center justify-center min-h-screen w-screen">
 //         <div className="text-center">
 //           <ShoppingBag className="w-16 h-16 text-indigo-600 animate-bounce mx-auto mb-4" />
 //           <h2 className="text-2xl font-semibold text-gray-800">Loading products...</h2>
 //         </div>
 //       </div>
 //     );
-
+//
 //   if (error)
 //     return (
 //       <div className="flex items-center justify-center min-h-screen">
 //         <h2 className="text-center text-red-500 text-xl mt-10 bg-red-50 px-6 py-4 rounded-lg shadow">{error.message}</h2>
 //       </div>
 //     );
-
+//
+//   const { products, total } = data;
+//   const totalPages = Math.ceil(total / PRODUCTS_PER_PAGE);
+//
 //   return (
 //     <div className="min-h-screen bg-gray-50">
 //       <div className="container mx-auto px-4 py-16">
@@ -102,11 +111,30 @@
 //             </div>
 //           )}
 //         </div>
+//
+//         {/* Pagination Controls */}
+//         <div className="mt-12 flex justify-center gap-4">
+//           <button
+//             disabled={page === 1}
+//             onClick={() => setPage((prev) => prev - 1)}
+//             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+//           >
+//             Previous
+//           </button>
+//           <span className="text-gray-600 font-medium">Page {page} of {totalPages}</span>
+//           <button
+//             disabled={page === totalPages}
+//             onClick={() => setPage((prev) => prev + 1)}
+//             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+//           >
+//             Next
+//           </button>
+//         </div>
 //       </div>
 //     </div>
 //   );
 // };
-
+//
 // export default Home;
 
 
@@ -124,18 +152,36 @@
 
 
 
-import { useContext, useState } from "react";
+
+
+
+
+
+
+import { useContext, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "../api";
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ShoppingBag, Star, Package, ShoppingCart, Heart, Eye } from "lucide-react";
+import ProductFilters from "../components/ProductFilters";
 
 const PRODUCTS_PER_PAGE = 8;
 
 const Home = () => {
   const cartContext = useContext(CartContext);
   const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState({
+    collectionId: "",
+    minPrice: "",
+    maxPrice: "",
+    sortBy: ""
+  });
+
+  useEffect(() => {
+    // Reset page when filters change
+    setPage(1);
+  }, [filters]);
 
   if (!cartContext) {
     return <h2 className="text-center text-red-500 text-xl mt-10">Error: CartContext is not available.</h2>;
@@ -143,13 +189,29 @@ const Home = () => {
 
   const { addToCart } = cartContext;
 
+  const handleFilterChange = (name, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      collectionId: "",
+      minPrice: "",
+      maxPrice: "",
+      sortBy: ""
+    });
+  };
+
   const {
     data,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["products", page],
-    queryFn: () => fetchProducts(page, PRODUCTS_PER_PAGE),
+    queryKey: ["products", page, filters],
+    queryFn: () => fetchProducts(page, PRODUCTS_PER_PAGE, filters),
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5,
   });
@@ -178,6 +240,25 @@ const Home = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">Featured Products</h2>
+        
+        {/* Product Filters Component */}
+        <ProductFilters 
+          onFilterChange={handleFilterChange} 
+          filters={filters}
+          clearFilters={clearFilters}
+        />
+
+        {/* Status message for filtered results */}
+        {(filters.collectionId || filters.minPrice || filters.maxPrice || filters.sortBy) && (
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Showing {products.length} {products.length === 1 ? 'result' : 'results'} 
+              {total > PRODUCTS_PER_PAGE ? ` (page ${page} of ${totalPages})` : ''}
+            </p>
+          </div>
+        )}
+
+        {/* Products Grid */}
         <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-8">
           {products.length > 0 ? (
             products.map((product) => (
@@ -233,29 +314,37 @@ const Home = () => {
           ) : (
             <div className="col-span-full text-center py-12">
               <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-xl text-gray-500">No products available.</h2>
+              <h2 className="text-xl text-gray-500">No products found matching your filters.</h2>
+              <button 
+                onClick={clearFilters}
+                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
+                Clear Filters
+              </button>
             </div>
           )}
         </div>
 
         {/* Pagination Controls */}
-        <div className="mt-12 flex justify-center gap-4">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((prev) => prev - 1)}
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-gray-600 font-medium">Page {page} of {totalPages}</span>
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((prev) => prev + 1)}
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        {products.length > 0 && (
+          <div className="mt-12 flex justify-center gap-4">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((prev) => prev - 1)}
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="text-gray-600 font-medium">Page {page} of {totalPages}</span>
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((prev) => prev + 1)}
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
