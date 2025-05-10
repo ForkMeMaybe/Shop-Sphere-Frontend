@@ -439,7 +439,7 @@ const Checkout = () => {
         description: "Order Payment",
         order_id: paymentData.razorpay_order_id,
         handler: async function (response) {
-          console.log("Payment Success:", response);
+          // console.log("Payment Success:", response);
           setIsProcessingPayment(true);
 
           const verifyResponse = await fetch(
@@ -464,7 +464,7 @@ const Checkout = () => {
 
           if (!orderResponse.ok) throw new Error("Failed to place order");
 
-          console.log("✅ Order placed successfully:", await orderResponse.json());
+          // console.log("✅ Order placed successfully:", await orderResponse.json());
 
           setTimeout(() => {
             setIsProcessingPayment(false);
@@ -521,7 +521,7 @@ const Checkout = () => {
 
       if (!orderResponse.ok) throw new Error("Failed to place order");
 
-      console.log("✅ COD Order placed successfully:", await orderResponse.json());
+      // console.log("✅ COD Order placed successfully:", await orderResponse.json());
 
       setTimeout(() => {
         setIsCODLoading(false);

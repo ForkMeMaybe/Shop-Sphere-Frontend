@@ -22,10 +22,10 @@ export const CartProvider = ({ children }) => {
       try {
         const newCart = await createCart(); // 🔥 API Call
 
-        console.log("✅ API Response for New Cart:", newCart); // 🔥 Debugging log
+        // console.log("✅ API Response for New Cart:", newCart); // 🔥 Debugging log
 
         if (newCart && newCart.id) {
-          console.log("✅ New cart created:", newCart.id);
+          // console.log("✅ New cart created:", newCart.id);
 
           // ✅ Store cart ID correctly
           localStorage.setItem("cartId", newCart.id);
@@ -52,9 +52,9 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      console.log("Fetching cart data from backend for ID:", storedCartId);
+      // console.log("Fetching cart data from backend for ID:", storedCartId);
       const response = await fetchCart(storedCartId);
-      console.log("FetchCart Response:", response);
+      // console.log("FetchCart Response:", response);
 
       if (response && response.id) {
         setCartItems(response.items || []);
@@ -85,7 +85,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      console.log("Adding product to cart:", product.id);
+      // console.log("Adding product to cart:", product.id);
       await addItemToCart(storedCartId, product.id, 1);
       fetchCartData(); // ✅ Refresh cart data
     } catch (error) {
@@ -98,7 +98,7 @@ export const CartProvider = ({ children }) => {
     try {
       if (!cartId) return;
 
-      console.log(`Removing item ${itemId} from cart...`);
+      // console.log(`Removing item ${itemId} from cart...`);
       await removeCartItem(cartId, itemId);
       fetchCartData(); // ✅ Refresh cart data
     } catch (error) {

@@ -29,7 +29,7 @@ const Orders = () => {
 
       try {
         const data = await fetchOrders();
-        console.log("Fetched orders:", data);
+        // console.log("Fetched orders:", data);
 
         if (!Array.isArray(data)) {
           console.error("Unexpected response format:", data);

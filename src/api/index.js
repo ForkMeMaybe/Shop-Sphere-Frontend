@@ -307,7 +307,7 @@ export const fetchOrders = async () => {
     }
 
     const data = await response.json(); // ✅ Convert response to JSON
-    console.log("✅ Orders API Response:", data);
+    // console.log("✅ Orders API Response:", data);
 
     return data; // ✅ Return parsed JSON
   } catch (error) {
@@ -348,7 +348,7 @@ export const createCart = async () => {
 
     const data = await response.json(); // ✅ Convert response to JSON
 
-    console.log("CreateCart API Parsed Response:", data); // 🔥 Debugging log
+    // console.log("CreateCart API Parsed Response:", data); // 🔥 Debugging log
 
     if (!data || !data.id) {
       throw new Error("Invalid cart response: Missing cart ID");
@@ -373,7 +373,7 @@ export const fetchCart = async (cartId) => {
     },
   });
 
-  console.log("FetchCart Response:", response); // ✅ Debugging
+  // console.log("FetchCart Response:", response); // ✅ Debugging
 
   if (response.redirected) {
     console.error("FetchCart was redirected. Possible authentication issue.");
@@ -417,7 +417,7 @@ export const removeCartItem = async (cartId, itemId) => {
     },
   });
 
-  console.log("RemoveCartItem Response:", response); // ✅ Debugging
+  // console.log("RemoveCartItem Response:", response); // ✅ Debugging
 
   if (response.redirected) {
     console.error("RemoveCartItem was redirected. Possible authentication issue.");
