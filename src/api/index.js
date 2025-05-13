@@ -365,7 +365,7 @@ export const createCart = async () => {
 
 // ✅ Fetch Existing Cart
 export const fetchCart = async (cartId) => {
-  const response = await fetch(`https://shop-sphere-app.onrender.com/store/carts/${cartId}/`, {
+  const response = await fetch(`${API_BASE_URL}/store/carts/${cartId}/`, {
     method: "GET",
     credentials: "include", // ✅ Ensure cookies are sent
     headers: {
@@ -409,7 +409,7 @@ export const updateCartItem = async (cartId, itemId, quantity) => {
 };
 
 export const removeCartItem = async (cartId, itemId) => {
-  const response = await fetch(`https://shop-sphere-app.onrender.com/store/carts/${cartId}/items/${itemId}/`, {
+  const response = await fetch(`${API_BASE_URL}/store/carts/${cartId}/items/${itemId}/`, {
     method: "DELETE",
     credentials: "include", // ✅ Ensure cookies are sent
     headers: {

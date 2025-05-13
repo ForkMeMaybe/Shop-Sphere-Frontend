@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import secureFetch from "../utils/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const AuthContext = createContext(null);
 
@@ -32,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Login User
   const login = async (username, password) => {
     try {
-      const response = await fetch("https://shop-sphere-app.onrender.com/auth/jwt/create/", {
+      const response = await fetch(`${API_BASE_URL}/auth/jwt/create/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

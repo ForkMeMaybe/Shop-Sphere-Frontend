@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // ✅ Function to Refresh CSRF Token
 export const refreshCsrfToken = async () => {
   try {
-    const response = await fetch("https://shop-sphere-app.onrender.com/get_csrf_token/", {
+    const response = await fetch(`${API_BASE_URL}/get_csrf_token/`, {
       method: "GET",
       credentials: "include",
     });
