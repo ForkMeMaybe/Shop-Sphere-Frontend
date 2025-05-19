@@ -334,7 +334,7 @@ const Home = () => {
                     <p className="text-2xl font-bold text-indigo-600">₹{product.unit_price.toFixed(2)}</p>
                     <button
                       onClick={() => addToCart(product)}
-                      className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors w-full sm:w-auto text-sm sm:text-base"
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm sm:text-base font-semibold shadow-md border border-indigo-700 hover:bg-indigo-700 hover:shadow-lg transition-all"
                     >
                       <ShoppingCart className="w-5 h-5" />
                       <span>Add to Cart</span>
