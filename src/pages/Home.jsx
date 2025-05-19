@@ -1,15 +1,27 @@
-// import { useContext, useState } from "react";
+// import { useContext, useState, useEffect } from "react";
 // import { useQuery } from "@tanstack/react-query";
 // import { fetchProducts } from "../api";
 // import { Link } from "react-router-dom";
 // import { CartContext } from "../context/CartContext";
 // import { ShoppingBag, Star, Package, ShoppingCart, Heart, Eye } from "lucide-react";
+// import ProductFilters from "../components/ProductFilters";
 //
 // const PRODUCTS_PER_PAGE = 8;
 //
 // const Home = () => {
 //   const cartContext = useContext(CartContext);
 //   const [page, setPage] = useState(1);
+//   const [filters, setFilters] = useState({
+//     collectionId: "",
+//     minPrice: "",
+//     maxPrice: "",
+//     sortBy: ""
+//   });
+//
+//   useEffect(() => {
+//     // Reset page when filters change
+//     setPage(1);
+//   }, [filters]);
 //
 //   if (!cartContext) {
 //     return <h2 className="text-center text-red-500 text-xl mt-10">Error: CartContext is not available.</h2>;
@@ -17,13 +29,29 @@
 //
 //   const { addToCart } = cartContext;
 //
+//   const handleFilterChange = (name, value) => {
+//     setFilters(prev => ({
+//       ...prev,
+//       [name]: value
+//     }));
+//   };
+//
+//   const clearFilters = () => {
+//     setFilters({
+//       collectionId: "",
+//       minPrice: "",
+//       maxPrice: "",
+//       sortBy: ""
+//     });
+//   };
+//
 //   const {
 //     data,
 //     isLoading,
 //     error,
 //   } = useQuery({
-//     queryKey: ["products", page],
-//     queryFn: () => fetchProducts(page, PRODUCTS_PER_PAGE),
+//     queryKey: ["products", page, filters],
+//     queryFn: () => fetchProducts(page, PRODUCTS_PER_PAGE, filters),
 //     keepPreviousData: true,
 //     staleTime: 1000 * 60 * 5,
 //   });
@@ -52,6 +80,25 @@
 //     <div className="min-h-screen bg-gray-50">
 //       <div className="container mx-auto px-4 py-16">
 //         <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">Featured Products</h2>
+//         
+//         {/* Product Filters Component */}
+//         <ProductFilters 
+//           onFilterChange={handleFilterChange} 
+//           filters={filters}
+//           clearFilters={clearFilters}
+//         />
+//
+//         {/* Status message for filtered results */}
+//         {(filters.collectionId || filters.minPrice || filters.maxPrice || filters.sortBy) && (
+//           <div className="mb-6">
+//             <p className="text-gray-600">
+//               Showing {products.length} {products.length === 1 ? 'result' : 'results'} 
+//               {total > PRODUCTS_PER_PAGE ? ` (page ${page} of ${totalPages})` : ''}
+//             </p>
+//           </div>
+//         )}
+//
+//         {/* Products Grid */}
 //         <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-8">
 //           {products.length > 0 ? (
 //             products.map((product) => (
@@ -107,50 +154,43 @@
 //           ) : (
 //             <div className="col-span-full text-center py-12">
 //               <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-//               <h2 className="text-xl text-gray-500">No products available.</h2>
+//               <h2 className="text-xl text-gray-500">No products found matching your filters.</h2>
+//               <button 
+//                 onClick={clearFilters}
+//                 className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+//               >
+//                 Clear Filters
+//               </button>
 //             </div>
 //           )}
 //         </div>
 //
 //         {/* Pagination Controls */}
-//         <div className="mt-12 flex justify-center gap-4">
-//           <button
-//             disabled={page === 1}
-//             onClick={() => setPage((prev) => prev - 1)}
-//             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-//           >
-//             Previous
-//           </button>
-//           <span className="text-gray-600 font-medium">Page {page} of {totalPages}</span>
-//           <button
-//             disabled={page === totalPages}
-//             onClick={() => setPage((prev) => prev + 1)}
-//             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-//           >
-//             Next
-//           </button>
-//         </div>
+//         {products.length > 0 && (
+//           <div className="mt-12 flex justify-center gap-4">
+//             <button
+//               disabled={page === 1}
+//               onClick={() => setPage((prev) => prev - 1)}
+//               className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+//             >
+//               Previous
+//             </button>
+//             <span className="text-gray-600 font-medium">Page {page} of {totalPages}</span>
+//             <button
+//               disabled={page === totalPages}
+//               onClick={() => setPage((prev) => prev + 1)}
+//               className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+//             >
+//               Next
+//             </button>
+//           </div>
+//         )}
 //       </div>
 //     </div>
 //   );
 // };
 //
 // export default Home;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -179,8 +219,7 @@ const Home = () => {
   });
 
   useEffect(() => {
-    // Reset page when filters change
-    setPage(1);
+    setPage(1); // Reset page when filters change
   }, [filters]);
 
   if (!cartContext) {
@@ -190,10 +229,7 @@ const Home = () => {
   const { addToCart } = cartContext;
 
   const handleFilterChange = (name, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
   const clearFilters = () => {
@@ -241,14 +277,12 @@ const Home = () => {
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">Featured Products</h2>
         
-        {/* Product Filters Component */}
         <ProductFilters 
           onFilterChange={handleFilterChange} 
           filters={filters}
           clearFilters={clearFilters}
         />
 
-        {/* Status message for filtered results */}
         {(filters.collectionId || filters.minPrice || filters.maxPrice || filters.sortBy) && (
           <div className="mb-6">
             <p className="text-gray-600">
@@ -258,7 +292,6 @@ const Home = () => {
           </div>
         )}
 
-        {/* Products Grid */}
         <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-8">
           {products.length > 0 ? (
             products.map((product) => (
@@ -275,11 +308,11 @@ const Home = () => {
                       <img src="/placeholder.jpg" alt="No image available" className="w-full h-full object-cover opacity-50" />
                     )}
                     <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
-                        <Heart className="w-5 h-5 text-gray-600" />
+                      <button className="p-2 bg-white border border-gray-200 rounded-full shadow hover:bg-gray-100 transition-colors">
+                        <Heart className="w-5 h-5 text-gray-700" />
                       </button>
-                      <button className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
-                        <Eye className="w-5 h-5 text-gray-600" />
+                      <button className="p-2 bg-white border border-gray-200 rounded-full shadow hover:bg-gray-100 transition-colors">
+                        <Eye className="w-5 h-5 text-gray-700" />
                       </button>
                     </div>
                   </div>
@@ -325,7 +358,6 @@ const Home = () => {
           )}
         </div>
 
-        {/* Pagination Controls */}
         {products.length > 0 && (
           <div className="mt-12 flex justify-center gap-4">
             <button
@@ -351,3 +383,4 @@ const Home = () => {
 };
 
 export default Home;
+
