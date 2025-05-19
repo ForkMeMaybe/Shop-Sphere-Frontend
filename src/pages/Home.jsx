@@ -219,7 +219,7 @@ const Home = () => {
   });
 
   useEffect(() => {
-    setPage(1); // Reset page when filters change
+    setPage(1);
   }, [filters]);
 
   if (!cartContext) {
@@ -241,18 +241,14 @@ const Home = () => {
     });
   };
 
-  const {
-    data,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["products", page, filters],
     queryFn: () => fetchProducts(page, PRODUCTS_PER_PAGE, filters),
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5,
   });
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen w-screen">
         <div className="text-center">
@@ -261,13 +257,15 @@ const Home = () => {
         </div>
       </div>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <h2 className="text-center text-red-500 text-xl mt-10 bg-red-50 px-6 py-4 rounded-lg shadow">{error.message}</h2>
       </div>
     );
+  }
 
   const { products, total } = data;
   const totalPages = Math.ceil(total / PRODUCTS_PER_PAGE);
@@ -335,7 +333,7 @@ const Home = () => {
                     <p className="text-2xl font-bold text-indigo-600">₹{product.unit_price.toFixed(2)}</p>
                     <button
                       onClick={() => addToCart(product)}
-                      className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                      className="flex items-center gap-2 min-w-[140px] px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm sm:text-base"
                     >
                       <ShoppingCart className="w-5 h-5" />
                       <span>Add to Cart</span>
