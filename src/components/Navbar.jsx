@@ -185,7 +185,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-white/10 bg-indigo-700">
+          <div className="md:hidden border-t border-white/10">
             <div className="px-4 py-3 space-y-3">
               {user ? (
                 <>
