@@ -199,7 +199,6 @@
 
 
 
-export default Home;
 import { useContext, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "../api";
