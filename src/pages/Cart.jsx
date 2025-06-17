@@ -250,18 +250,22 @@ const Cart = () => {
     navigate("/checkout");
   };
 
-  const increaseQuantity = async (itemId, quantity) => {
-    try {
-      setOperationLoading(itemId);
-      await addItemToCart(cartId, itemId, quantity);
-      // window.location.reload();
-      await fetchCartData();
-    } catch (error) {
-      console.error("Failed to update cart item quantity:", error);
-    } finally {
-      setOperationLoading(null);
-    }
-  };
+  const increaseQuantity = async (itemId, increment) => {
+      try {
+        setOperationLoading(itemId);
+        
+        const item = cartItems.find(i => i.id === itemId);
+        if (!item) throw new Error("Item not found in cart");
+
+        await addItemToCart(cartId, item.product.id, increment);
+        await fetchCartData();
+      } catch (error) {
+        console.error("Failed to update cart item quantity:", error);
+      } finally {
+        setOperationLoading(null);
+      }
+   };
+
 
   const decreaseQuantity = async (itemId, quantity) => {
     try {
@@ -365,7 +369,7 @@ const Cart = () => {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => increaseQuantity(item.product.id, 1)}
+                            onClick={() => increaseQuantity(item.id, 1)}
                             className="p-1 rounded-full hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
                             disabled={operationLoading === item.id}
                             aria-label="Increase quantity"
