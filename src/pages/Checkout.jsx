@@ -81,7 +81,7 @@ const Checkout = () => {
           "Content-Type": "application/json",
           Authorization: `JWT ${token}`,
         },
-        body: JSON.stringify({ amount: totalPrice }),
+        body: JSON.stringify({ cart_id: cartId }),
       });
 
       if (!response.ok) throw new Error("Failed to create payment order");
@@ -96,7 +96,6 @@ const Checkout = () => {
         description: "Order Payment",
         order_id: paymentData.razorpay_order_id,
         handler: async function (response) {
-          // console.log("Payment Success:", response);
           setIsProcessingPayment(true);
 
           const verifyResponse = await fetch(
@@ -121,7 +120,6 @@ const Checkout = () => {
 
           if (!orderResponse.ok) throw new Error("Failed to place order");
 
-          // console.log("✅ Order placed successfully:", await orderResponse.json());
 
           setTimeout(() => {
             setIsProcessingPayment(false);
@@ -178,7 +176,6 @@ const Checkout = () => {
 
       if (!orderResponse.ok) throw new Error("Failed to place order");
 
-      // console.log("✅ COD Order placed successfully:", await orderResponse.json());
 
       setTimeout(() => {
         setIsCODLoading(false);
@@ -205,6 +202,15 @@ const Checkout = () => {
           <h1 className="text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-4">Checkout</h1>
           <p className="text-lg text-gray-600">Complete your purchase securely</p>
         </div>
+
+              {/* Payment Mode Note */}
+        <div className="mb-4 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-1 flex-shrink-0" />
+          <p className="text-sm text-yellow-800">
+            <strong>Note:</strong> If you're planning to pay online, keep the total price <strong>₹25,000 or less</strong>. Payments are in <em>test mode</em> and this is the maximum allowed limit.
+          </p>
+        </div>
+
 
         {/* Processing Payment Overlay */}
         {isProcessingPayment && (
