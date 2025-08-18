@@ -123,43 +123,48 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!otpVerified) {
-      setError("Please verify your email first");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setFieldErrors({});
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/users/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        navigate("/login");
-      } else {
-        if (data && typeof data === "object") {
-          setFieldErrors(data);
-        } else {
-          setError(data.error || "Registration failed");
-        }
+      e.preventDefault();
+      if (!otpVerified) {
+        setError("Please verify your email first");
+        return;
       }
-    } catch {
-      setError("An error occurred during registration");
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      setLoading(true);
+      setError("");
+      setFieldErrors({});
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/users/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          navigate("/login");
+        } else {
+          if (data && typeof data === "object") {
+            if (data.email && typeof data.email === "string") {
+              setError(data.email);
+            } else {
+              setFieldErrors(data);
+            }
+          } else {
+            setError(data.error || "Registration failed");
+          }
+        }
+      } catch {
+        setError("An error occurred during registration");
+      } finally {
+        setLoading(false);
+      }
+    };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex justify-center items-center p-4 w-screen ">
