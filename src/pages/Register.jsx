@@ -153,17 +153,17 @@ const Register = () => {
           navigate("/login");
         } else {
           if (data && typeof data === "object") {
-            if (data.email && typeof data.email === "string") {
-              console.log("Setting error:", data.email);
-
-              setError(data.email);
+              if (data.email) {
+                const emailError = Array.isArray(data.email) ? data.email[0] : data.email;
+                console.log("Setting error:", emailError);
+                setError(emailError);
+              } else {
+                console.log("Setting field errors:", data);
+                setFieldErrors(data);
+              }
             } else {
-              console.log("Setting field errors:", data);
-              setFieldErrors(data);
+              setError(data.error || "Registration failed");
             }
-          } else {
-            setError(data.error || "Registration failed");
-          }
         }
       } catch {
         setError("An error occurred during registration");
