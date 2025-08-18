@@ -144,14 +144,21 @@ const Register = () => {
           body: JSON.stringify(formData),
         });
 
+        console.log("Response status:", response.status);
+
         const data = await response.json();
+        console.log("Response JSON:", data);
+
         if (response.ok) {
           navigate("/login");
         } else {
           if (data && typeof data === "object") {
             if (data.email && typeof data.email === "string") {
+              console.log("Setting error:", data.email);
+
               setError(data.email);
             } else {
+              console.log("Setting field errors:", data);
               setFieldErrors(data);
             }
           } else {
