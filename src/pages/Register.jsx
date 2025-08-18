@@ -144,10 +144,8 @@ const Register = () => {
           body: JSON.stringify(formData),
         });
 
-        console.log("Response status:", response.status);
 
         const data = await response.json();
-        console.log("Response JSON:", data);
 
         if (response.ok) {
           navigate("/login");
@@ -155,10 +153,8 @@ const Register = () => {
           if (data && typeof data === "object") {
               if (data.email) {
                 const emailError = Array.isArray(data.email) ? data.email[0] : data.email;
-                console.log("Setting error:", emailError);
                 setError(emailError);
               } else {
-                console.log("Setting field errors:", data);
                 setFieldErrors(data);
               }
             } else {
