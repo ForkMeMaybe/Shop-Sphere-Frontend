@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import ProductFilters from "../components/ProductFilters";
 
-const PRODUCTS_PER_PAGE = 8;
+const PRODUCTS_PER_PAGE = 4;
 
 const Home = () => {
   const cartContext = useContext(CartContext);
@@ -251,4 +251,3 @@ const Home = () => {
 };
 
 export default Home;
-
