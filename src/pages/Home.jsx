@@ -70,7 +70,8 @@ const Home = () => {
         <div className="text-center">
           <ShoppingBag className="w-16 h-16 text-indigo-600 animate-bounce mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-gray-800">
-            Loading products...
+            Loading products... (It might take some time to wake the free
+            backend server. So hang in there.)
           </h2>
         </div>
       </div>
