@@ -80,7 +80,7 @@ const Register = () => {
       const data = await response.json();
       if (response.ok) {
         setOtpSent(true);
-        setOtpMessage("OTP sent successfully! Check your email.");
+        setOtpMessage("OTP sent successfully! Check your Inbox and SPAM.");
       } else {
         setError(data.error || "Failed to send OTP");
       }
@@ -123,51 +123,51 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-      e.preventDefault();
-      if (!otpVerified) {
-        setError("Please verify your email first");
-        return;
-      }
+    e.preventDefault();
+    if (!otpVerified) {
+      setError("Please verify your email first");
+      return;
+    }
 
-      setLoading(true);
-      setError("");
-      setFieldErrors({});
+    setLoading(true);
+    setError("");
+    setFieldErrors({});
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/auth/users/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
-          },
-          credentials: "include",
-          body: JSON.stringify(formData),
-        });
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/users/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
 
+      const data = await response.json();
 
-        const data = await response.json();
-
-        if (response.ok) {
-          navigate("/login");
+      if (response.ok) {
+        navigate("/login");
+      } else {
+        if (data && typeof data === "object") {
+          if (data.email) {
+            const emailError = Array.isArray(data.email)
+              ? data.email[0]
+              : data.email;
+            setError(emailError);
+          } else {
+            setFieldErrors(data);
+          }
         } else {
-          if (data && typeof data === "object") {
-              if (data.email) {
-                const emailError = Array.isArray(data.email) ? data.email[0] : data.email;
-                setError(emailError);
-              } else {
-                setFieldErrors(data);
-              }
-            } else {
-              setError(data.error || "Registration failed");
-            }
+          setError(data.error || "Registration failed");
         }
-      } catch {
-        setError("An error occurred during registration");
-      } finally {
-        setLoading(false);
       }
-    };
-
+    } catch {
+      setError("An error occurred during registration");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex justify-center items-center p-4 w-screen ">
@@ -199,7 +199,10 @@ const Register = () => {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Username
               </label>
               <div className="relative">
@@ -218,13 +221,18 @@ const Register = () => {
                 />
               </div>
               {fieldErrors.username && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.username[0]}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {fieldErrors.username[0]}
+                </p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="first_name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   First Name
                 </label>
                 <div className="relative">
@@ -242,7 +250,10 @@ const Register = () => {
                 </div>
               </div>
               <div>
-                <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="last_name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Last Name
                 </label>
                 <div className="relative">
@@ -262,7 +273,10 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email Address
               </label>
               <div className="flex space-x-2">
@@ -291,14 +305,21 @@ const Register = () => {
                   } disabled:opacity-50`}
                   title={otpSent ? "OTP Sent" : "Send verification code"}
                 >
-                  {otpSent ? <CheckCircle className="h-5 w-5" /> : <Send className="h-5 w-5" />}
+                  {otpSent ? (
+                    <CheckCircle className="h-5 w-5" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
 
             {otpSent && (
               <div>
-                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="otp"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Verification Code
                 </label>
                 <div className="flex space-x-2">
@@ -326,7 +347,10 @@ const Register = () => {
             )}
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
               <div className="relative">
@@ -346,7 +370,11 @@ const Register = () => {
                   onClick={() => togglePasswordVisibility("password")}
                   className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                 >
-                  {showPasswords.password ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPasswords.password ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
               {fieldErrors.password && (
@@ -359,7 +387,10 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="re_password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="re_password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -410,4 +441,3 @@ const Register = () => {
 };
 
 export default Register;
-
