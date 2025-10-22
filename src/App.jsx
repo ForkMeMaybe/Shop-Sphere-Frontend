@@ -15,6 +15,7 @@ import Navbar from "./components/Navbar";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
+import ChatWidget from "./components/ChatWidget";
 import "./index.css";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Router>
         <CartProvider>
           <Navbar />
+          <ChatWidget />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetail />} />
