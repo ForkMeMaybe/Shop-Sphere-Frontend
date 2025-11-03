@@ -102,3 +102,14 @@
 .chat-widget-input button:hover {
   background-color: #535bf2;
 }
+
+.orders-mode-toggle-button {
+  margin-left: 0.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
