@@ -39,18 +39,18 @@ const ChatWidget = () => {
     try {
       let messageToSend = inputValue;
       if (isCartMode && cartId) {
-        // messageToSend += ` (Cart ID: ${cartId})`;
-        messageToSend += " Cart id is: e36cf87c-3184-4a3c-aee4-a8fd55721a9a";
+        messageToSend += ` Cart ID is: ${cartId}`;
+        // messageToSend += " Cart id is: fdb472d3-631e-44ee-b15c-f8fb66152ea6";
       } else if (isOrdersMode) {
         const token = localStorage.getItem("access_token");
         if (token) {
-          // messageToSend += ` (JWT Token: ${token})`;
-          messageToSend +=
-            " JWT token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYyMzMyMTA3LCJpYXQiOjE3NjIyNDU3MDcsImp0aSI6IjgwNjgzZTRiOTU2YzQ5MjZiYmRiODM2YzBhOTI0YTFiIiwidXNlcl9pZCI6MX0.Dd_iBTHVxrm5QHLim7SVbt10KR-oBkKxW5nxdjq5cF0";
+          messageToSend += ` JWT Token: ${token}`;
+          // messageToSend +=
+          //   " JWT token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NTA0MDU4LCJpYXQiOjE3NjQ0MTc2NTgsImp0aSI6IjY3OTU4Y2JmNDlhNjQ4ODA4NzI0N2Q5OWVhMmNlZjQzIiwidXNlcl9pZCI6MX0.ccguLbf0zfRMFek664bAS5_I_5JSzcNlwHEk_2H1fqg";
         }
         if (cartId) {
-          // messageToSend += ` (Cart ID: ${cartId})`;
-          messageToSend += " Cart id is: e36cf87c-3184-4a3c-aee4-a8fd55721a9a";
+          messageToSend += ` Cart ID is: ${cartId}`;
+          // messageToSend += " Cart id is: fdb472d3-631e-44ee-b15c-f8fb66152ea6";
         }
       }
 
