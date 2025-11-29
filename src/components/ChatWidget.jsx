@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import "./ChatWidget.css";
 import secureFetch from "../utils/api";
 import { CartContext } from "../context/CartContext";
+import chatWidgetIcon from "../assets/chatWidgetIcon.jpg";
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +80,7 @@ const ChatWidget = () => {
   return (
     <div className="chat-widget-container">
       <button className="chat-widget-toggle-button" onClick={toggleChat}>
-        Chat
+        <img src={chatWidgetIcon} alt="Chat" />
       </button>
       {isOpen && (
         <div className="chat-widget-window">
