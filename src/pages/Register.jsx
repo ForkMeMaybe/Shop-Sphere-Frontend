@@ -6,8 +6,6 @@ import {
   Mail,
   Lock,
   User,
-  Send,
-  CheckCircle,
   UserCircle,
   ChevronRight,
   Eye,
@@ -34,10 +32,6 @@ const Register = () => {
     re_password: false,
   });
 
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [otpMessage, setOtpMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
@@ -61,73 +55,10 @@ const Register = () => {
     }));
   };
 
-  const handleSendOTP = async () => {
-    setLoading(true);
-    setError("");
-    setOtpMessage("");
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/send_otp/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        credentials: "include",
-        body: JSON.stringify({ email: formData.email }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setOtpSent(true);
-        setOtpMessage("OTP sent successfully! Check your Inbox and SPAM.");
-      } else {
-        setError(data.error || "Failed to send OTP");
-      }
-    } catch {
-      setError("An error occurred while sending OTP");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    setLoading(true);
-    setError("");
-    setOtpMessage("");
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/verify_otp/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        credentials: "include",
-        body: JSON.stringify({ email: formData.email, otp }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setOtpVerified(true);
-        setOtpMessage("Email verified successfully!");
-      } else {
-        setError(data.message || "Invalid OTP");
-      }
-    } catch {
-      setError("An error occurred while verifying OTP");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!otpVerified) {
-      setError("Please verify your email first");
-      return;
-    }
 
     setLoading(true);
     setError("");
@@ -184,13 +115,6 @@ const Register = () => {
           <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-center">
             <span className="mr-2">⚠️</span>
             {error}
-          </div>
-        )}
-
-        {otpMessage && (
-          <div className="bg-green-50 text-green-600 p-3 rounded-lg text-sm flex items-center">
-            <CheckCircle className="w-4 h-4 mr-2" />
-            {otpMessage}
           </div>
         )}
 
@@ -279,72 +203,20 @@ const Register = () => {
               >
                 Email Address
               </label>
-              <div className="flex space-x-2">
-                <div className="relative flex-1">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    disabled={otpVerified}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 disabled:bg-gray-50"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSendOTP}
-                  disabled={otpSent}
-                  className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-                    otpSent
-                      ? "bg-green-50 text-green-600"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  } disabled:opacity-50`}
-                  title={otpSent ? "OTP Sent" : "Send verification code"}
-                >
-                  {otpSent ? (
-                    <CheckCircle className="h-5 w-5" />
-                  ) : (
-                    <Send className="h-5 w-5" />
-                  )}
-                </button>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                />
               </div>
             </div>
-
-            {otpSent && (
-              <div>
-                <label
-                  htmlFor="otp"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Verification Code
-                </label>
-                <div className="flex space-x-2">
-                  <div className="relative flex-1">
-                    <input
-                      id="otp"
-                      type="text"
-                      placeholder="Enter verification code"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      disabled={otpVerified}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 disabled:bg-gray-50"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleVerifyOTP}
-                    disabled={otpVerified}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
-                  >
-                    Verify
-                  </button>
-                </div>
-              </div>
-            )}
 
             <div>
               <label
@@ -422,7 +294,7 @@ const Register = () => {
 
           <button
             type="submit"
-            disabled={!otpVerified || loading}
+            disabled={loading}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 flex items-center justify-center space-x-2 transition-colors"
           >
             {loading ? (

@@ -852,21 +852,19 @@
 import React from 'react';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserInfo, updateUserInfo, sendOTP, verifyOTP, updatePassword, registerCustomer, getCustomerInfo } from "../api";
+import { getUserInfo, updateUserInfo, updatePassword, registerCustomer, getCustomerInfo } from "../api";
 import { fetchAddress, addAddress, updateAddress } from "../api";
 import { useCsrfToken } from "../utils/csrftoken.jsx";
 import { 
   User, 
   Mail, 
   Edit2, 
-  Check, 
   X, 
   Save, 
   RefreshCw,
   Shield, 
   UserCircle,
   AtSign,
-  Send,
   CheckCircle2,
   AlertCircle,
   KeyRound,
@@ -923,9 +921,6 @@ const Profile = () => {
   const [updatedFields, setUpdatedFields] = useState({});
   const [showUpdateButton, setShowUpdateButton] = useState({});
   const [fieldMessages, setFieldMessages] = useState({});
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -1026,9 +1021,6 @@ const Profile = () => {
       ...prev,
       [name]: value !== originalUser[name],
     }));
-    if (name === "email" && otpVerified) {
-      setShowUpdateButton((prev) => ({ ...prev, email: true }));
-    }
   };
 
   const handlePasswordChange = (e) => {
@@ -1051,12 +1043,6 @@ const Profile = () => {
       ...prev,
       [field]: true,
     }));
-    if (field === "email") {
-      setOtpVerified(false);
-      setOtpSent(false);
-      setOtp("");
-      setShowUpdateButton((prev) => ({ ...prev, email: false }));
-    }
   };
 
   const handleSave = (field) => {
@@ -1084,17 +1070,11 @@ const Profile = () => {
   };
 
   const handleUpdate = async (field) => {
-    if (!user[field] || (field === "email" && !otpVerified)) return;
+    if (!user[field]) return;
 
     try {
       await updateUserInfo(token, { [field]: user[field] });
       setFieldMessages({ ...fieldMessages, [field]: "Updated successfully!" });
-
-      if (field === "email") {
-        setOtpVerified(false);
-        setOtpSent(false);
-        setOtp("");
-      }
 
       setOriginalUser({ ...originalUser, [field]: user[field] });
       setUpdatedFields({ ...updatedFields, [field]: false });
@@ -1132,66 +1112,7 @@ const Profile = () => {
     }
   };
 
-  const handleSendOTP = async () => {
-    setLoading(true);
-    setError("");
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/send_otp/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        credentials: "include",
-        body: JSON.stringify({ email: user.email }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send OTP");
-      }
-
-      setOtpSent(true);
-      setOtp("");
-      setFieldMessages({ ...fieldMessages, email: "OTP sent. Check your email!" });
-    } catch (err) {
-      console.error("Error sending OTP:", err);
-      setError("Failed to send OTP. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/verify_otp/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        credentials: "include",
-        body: JSON.stringify({ email: user.email, otp }),
-      });
-
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to verify OTP");
-      }
-
-      setOtpVerified(true);
-      setFieldMessages((prev) => ({ ...prev, email: "OTP Verified! ✅" }));
-      setEditMode((prev) => ({ ...prev, email: true }));
-    } catch (err) {
-      console.error("Error verifying OTP:", err);
-      setError("Invalid OTP. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCustomerChange = (e) => {
     const { name, value } = e.target;
@@ -1364,16 +1285,14 @@ const Profile = () => {
                         </button>
                       ) : (
                         <>
-                          {otpVerified && (
-                            <button
-                              type="button"
-                              onClick={() => handleSave("email")}
-                              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-sm hover:shadow"
-                            >
-                              <Save className="w-4 h-4" />
-                              <span>Save</span>
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleSave("email")}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-sm hover:shadow"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>Save</span>
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleCancel("email")}
@@ -1382,52 +1301,12 @@ const Profile = () => {
                             <X className="w-4 h-4" />
                             <span>Cancel</span>
                           </button>
-                          {!otpVerified && (
-                            <button
-                              type="button"
-                              onClick={handleSendOTP}
-                              disabled={otpSent || loading}
-                              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow disabled:opacity-50"
-                            >
-                              <Send className="w-4 h-4" />
-                              <span>{otpSent ? "OTP Sent" : "Send OTP"}</span>
-                            </button>
-                          )}
                         </>
                       )}
                     </div>
                   </div>
 
-                  {otpSent && !otpVerified && (
-                    <div className="flex items-center gap-3 mt-4">
-                      <div className="flex-1 relative">
-                        <Shield className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
-                        <input
-                          type="text"
-                          placeholder="Enter OTP"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          className="w-full pl-10 p-3 border border-indigo-300 rounded-lg bg-white text-gray-900 ring-2 ring-indigo-100"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleVerifyOTP}
-                        disabled={!otp || loading}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-sm hover:shadow disabled:opacity-50"
-                      >
-                        <Check className="w-4 h-4" />
-                        <span>Verify OTP</span>
-                      </button>
-                    </div>
-                  )}
 
-                  {otpVerified && (
-                    <p className="flex items-center gap-2 text-green-600 text-sm mt-3">
-                      <CheckCircle2 className="w-4 h-4" />
-                      OTP Verified Successfully!
-                    </p>
-                  )}
                 </div>
               </div>
 
